@@ -1,0 +1,11 @@
+bin/
+db/
+src/testing
+.classpath
+.project
+.settings
+.git
+*.swp
+*~*
+*.sql
+
