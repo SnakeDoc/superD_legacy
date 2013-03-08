@@ -1,13 +1,10 @@
-+++ Super-Deduplication (superD) Utility. +++
----------------------------------------------
+# superD | A File (super)Deduplicator
 
-++ Written in pure Java ++
+## Written in pure Java
 
-superD - Author: Jason Sipula
----------------------------------------------
+#### superD - Author: Jason Sipula
 
-Copyright 2013 Jason Sipula | All Rights Reserved
----------------------------------------------
+### Copyright 2013 Jason Sipula | All Rights Reserved
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,4 +18,4 @@ Copyright 2013 Jason Sipula | All Rights Reserved
  See the License for the specific language governing permissions and
  limitations under the License.
 
-Last Updated: 2013-03-07
+###### Last Updated: 2013-03-07
