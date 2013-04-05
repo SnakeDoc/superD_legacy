@@ -71,7 +71,7 @@ public class DedupeR {
 		
 		for (File curFile : contents){
 		try{
-			if (curFile.isDirectory() && (curFile != null)){
+			if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
 				walk(curFile);
 			}else if(!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
 				System.out.println("Touched: " + curFile.getPath());
@@ -79,7 +79,7 @@ public class DedupeR {
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
 			System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + "  |  pathcalled: " + path.getPath());
-			continue;
+			
 		}
 		}
 	}
