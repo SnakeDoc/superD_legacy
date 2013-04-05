@@ -74,6 +74,9 @@ public class DedupeR {
 			if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
 				walk(curFile);
 			}else if(!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
+				/*hash file here and store to SQL database*/
+				/*String hash = Hasher.hash(curFile.getPath());*/
+				/*saveHash(hash, curFile.getPatch()); */
 				System.out.println("Touched: " + curFile.getPath());
 			}	
 		} catch (NullPointerException npe) {
