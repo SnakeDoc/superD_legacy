@@ -73,5 +73,15 @@ public class DedupeR {
 				continue;
 			}
 		}
+		/*PESUDOCODE FOR WALKER
+		String[] directories = String[];
+		for (i=0; i <= directories.length; i++){
+			walk(directories[i]);
+		}
+		String[] files = String[];
+		for (i=0; i<= files.length; i++){
+			hash(files[i]);
+		}
+		*/
 	}
 }
