@@ -61,27 +61,16 @@ public class DedupeR {
 		}
 		walk(rootDirs, deDupeObj, st);
 	}
-	public static void walk(File[] files, DeDupeObj[] deDupeObj, SQLiteStatement st) {
-		for (int i = 0; i < files.length; i++) {
-			try {
-				if (files[i].getAbsolutePath().equalsIgnoreCase(files[i].getCanonicalPath())) {
-					if (!(files[i].toString().contains("/."))) {
-						walk(DirectoryScanner.getList(files[i].toString(), st), deDupeObj, st);
-					}
-				}
-			} catch (NullPointerException | IOException e) {
-				continue;
-			}
-		}
-		/*PESUDOCODE FOR WALKER
-		String[] directories = String[];
-		for (i=0; i <= directories.length; i++){
-			walk(directories[i]);
-		}
-		String[] files = String[];
-		for (i=0; i<= files.length; i++){
-			hash(files[i]);
-		}
-		*/
+	
+	/*proof of concept walker */
+	public static void walk(File path){
+		File[] contents = path.listFiles();
+		for (int i = 0; i <= contents.length; i++){
+			if (contents[i].isDirectory()){
+				walk(contents[i]);
+			}else{
+				System.out.println("Touched: " + contents[i].getName());
+			}	
+		}	
 	}
 }
