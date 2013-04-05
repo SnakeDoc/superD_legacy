@@ -62,15 +62,25 @@ public class DedupeR {
 		walk(rootDirs, deDupeObj, st);
 	}
 	
-	/*proof of concept walker */
+	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
 	public static void walk(File path){
+		
+		int i=0;
+
 		File[] contents = path.listFiles();
-		for (int i = 0; i <= contents.length; i++){
-			if (contents[i].isDirectory()){
-				walk(contents[i]);
-			}else{
-				System.out.println("Touched: " + contents[i].getName());
+		
+		for (File curFile : contents){
+		try{
+			if (curFile.isDirectory() && (curFile != null)){
+				walk(curFile);
+			}else if(!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
+				System.out.println("Touched: " + curFile.getPath());
 			}	
-		}	
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + "  |  pathcalled: " + path.getPath());
+			continue;
+		}
+		}
 	}
 }
