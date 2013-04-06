@@ -61,17 +61,29 @@ public class DedupeR {
 		}
 		walk(rootDirs, deDupeObj, st);
 	}
-	public static void walk(File[] files, DeDupeObj[] deDupeObj, SQLiteStatement st) {
-		for (int i = 0; i < files.length; i++) {
-			try {
-				if (files[i].getAbsolutePath().equalsIgnoreCase(files[i].getCanonicalPath())) {
-					if (!(files[i].toString().contains("/."))) {
-						walk(DirectoryScanner.getList(files[i].toString(), st), deDupeObj, st);
-					}
-				}
-			} catch (NullPointerException | IOException e) {
-				continue;
-			}
+	
+	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
+	public static void walk(File path){
+		
+		int i=0;
+
+		File[] contents = path.listFiles();
+		
+		for (File curFile : contents){
+		try{
+			if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
+				walk(curFile);
+			}else if(!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
+				/*hash file here and store to SQL database*/
+				/*String hash = Hasher.hash(curFile.getPath());*/
+				/*saveHash(hash, curFile.getPatch()); */
+				System.out.println("Touched: " + curFile.getPath());
+			}	
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + "  |  pathcalled: " + path.getPath());
+			
+		}
 		}
 	}
 }
