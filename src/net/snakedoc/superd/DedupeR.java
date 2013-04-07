@@ -17,6 +17,7 @@
 package net.snakedoc.superd;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -40,10 +41,21 @@ public class DedupeR {
 		timer.startTimer();
 		
 		// get instance of other helper objects
-		H2 db = new H2();
+		H2 db = null;
+		try {
+			db = new H2();
+			// TODO i'm going to fix the exceptions being thrown from the database library
+			//      there needs to be added a constructor of H2() that does not read properties
+			//      so that it won't throw exceptions... therefore exceptions will be removed
+			//      from here.
+		} catch (IllegalArgumentException
+				| SecurityException | IOException e) {
+			// TODO log this
+			e.printStackTrace();
+		}
 		
 		SysInfo sys = new SysInfo();
-		DeDupeSQL sql = new DeDupeSQL();
+		DedupeSQL sql = new DedupeSQL();
 		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
@@ -97,18 +109,31 @@ public class DedupeR {
 		// TODO change to user specified root directory
 		rootDirs[0] = new File("/home/jason");
 
-		walk(rootDirs);
+		walk(rootDirs[0]);
 	}
-	public static void walk(File[] files) {
-		for (int i = 0; i < files.length; i++) {
-			try {
-				if (files[i].getAbsolutePath().equalsIgnoreCase(files[i].getCanonicalPath())) {
-					if (!(files[i].toString().contains("/."))) {
-						walk(DirectoryScanner.getList(files[i].toString(), st), deDupeObj, st);
-					}
-				}
-			} catch (NullPointerException | IOException e) {
-				continue;
+	
+	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
+	public static void walk(File path){
+		
+		int i=0;
+
+		File[] contents = path.listFiles();
+		
+		for (File curFile : contents){
+			try{
+				if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
+					walk(curFile);
+				} else if (!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
+					/*hash file here and store to SQL database*/
+					/*String hash = Hasher.hash(curFile.getPath());*/
+					/*saveHash(hash, curFile.getPatch()); */
+					System.out.println("Touched: " + curFile.getPath());
+				}	
+			} catch (NullPointerException e) {
+				// TODO change to log out (warning)
+				e.printStackTrace();
+				System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + 
+						"  |  pathcalled: " + path.getPath());
 			}
 		}
 	}

@@ -23,7 +23,7 @@ import java.sql.SQLException;
 
 import net.snakedoc.jutils.database.H2;
 
-public class DeDupeSQL {
+public class DedupeSQL {
 	
 	public void writeRecord(String file, String hash) {
 		
