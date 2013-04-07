@@ -42,9 +42,11 @@ public class DedupeR {
 		timer.startTimer();
 		
 		// get instance of other helper objects
+		Config config = new Config();
+		config.loadConfig("props/superD.properties");
 		H2 db = null;
 		try {
-			db = new H2();
+			db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPort"));
 			// TODO i'm going to fix the exceptions being thrown from the database library
 			//      there needs to be added a constructor of H2() that does not read properties
 			//      so that it won't throw exceptions... therefore exceptions will be removed
@@ -57,7 +59,8 @@ public class DedupeR {
 		
 		SysInfo sys = new SysInfo();
 		DedupeSQL sql = new DedupeSQL();
-		CheckDupes check = new CheckDupes();
+		// TODO fix CheckDedupes class
+//		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
 		// in the argument for hashVer...
@@ -82,7 +85,8 @@ public class DedupeR {
 			e.printStackTrace();
 		}
 		setup();
-		check.checkDupes();
+		// TODO fix checkDedupes()
+//		check.checkDupes();
 		try {
 			db.closeConnection();
 		} catch (SQLException e) {
