@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright 2013 Jason Sipula and Trace Hagan                                *
+ *  Copyright 2013 Jason Sipula, Trace Hagan                                   *
  *                                                                             *
  *  Licensed under the Apache License, Version 2.0 (the "License");            *
  *  you may not use this file except in compliance with the License.           *

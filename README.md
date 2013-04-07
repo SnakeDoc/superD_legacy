@@ -2,7 +2,7 @@
 
 ## Written in pure Java
 
-#### superD - Authors: Jason Sipula and Trace Hagan
+#### superD - Author(s): Jason Sipula, Trace Hagan
 
 ### Copyright 2013 Jason Sipula and Trace Hagan | All Rights Reserved
 
