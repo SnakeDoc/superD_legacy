@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
 import net.snakedoc.jutils.system.SysInfo;;
@@ -99,6 +100,10 @@ public class DedupeR {
 	
 	public static void setup() {
 		
+	    // load program propterties
+	    Config config = new Config();
+	    config.loadConfig("props/superD.properties");
+	    
 		/* TODO should not be limited to 1 directory to scan
 		 * should allow deduping multiple root directories.
 		 * this would be useful for deduping data sets that are
@@ -107,8 +112,12 @@ public class DedupeR {
 		File[] rootDirs = new File[1];
 		
 		// TODO change to user specified root directory
-		rootDirs[0] = new File("/home/jason");
-
+		try {
+            rootDirs[0] = new File(config.getConfig("ROOT"));
+        } catch (IllegalArgumentException | SecurityException | IOException e) {
+            // TODO log out (fatal)
+            e.printStackTrace();
+        }
 		walk(rootDirs[0]);
 	}
 	
