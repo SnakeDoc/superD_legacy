@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<Libraries>
+	<Library>
+		<FileName>h2-1.3.170.jar</FileName>
+		<Version>1.3.170</Version>
+		<ReleaseDate>2012-11-30</ReleaseDate>
+		<URL>http://www.h2database.com/</URL>
+		<Description>H2 Database JDBC Driver</Description>
+		<Required>False</Required>
+		<RequiredReason>Dependency for H2 Database</RequiredReason>
+	</Library>
+	<Library>
+		<FileName>log4j-1.2.17.jar</FileName>
+		<Version>1.2.17</Version>
+		<ReleaseDate>2012-05-06</ReleaseDate>
+		<URL>http://logging.apache.org/log4j/1.2/</URL>
+		<Description>log4j Logging Driver</Description>
+		<Required>False</Required>
+		<RequiredReason>Dependency for net.snakedoc.jutils.testsuite.* classes</RequiredReason>
+	</Library>
+</Libraries>
