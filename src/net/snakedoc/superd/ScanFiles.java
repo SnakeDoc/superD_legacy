@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 import net.snakedoc.jutils.io.DirectoryScanner;
-import net.snakedoc.jutils.io.HashTypeException;
+import net.snakedoc.jutils.io.HasherException;
 import net.snakedoc.jutils.io.Hasher;
 
 public class ScanFiles extends DirectoryScanner {
@@ -38,10 +38,11 @@ public class ScanFiles extends DirectoryScanner {
 			System.out.println(i);
 			if (files.get(i).isFile() && files.get(i).canRead()) {
 				String file = files.get(i).toString();
-				String hash;
+				String hash = "";
                 try {
                     hash = getHash.getHash(files.get(i).toString(), "SHA-512");
-                } catch (HashTypeException e) {
+                } catch (HasherException e) {
+                    //TODO log out
                     e.printStackTrace();
                 }
 				sql.writeRecord(file, hash);

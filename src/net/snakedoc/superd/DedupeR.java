@@ -24,6 +24,8 @@ import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
+import net.snakedoc.jutils.io.Hasher;
+import net.snakedoc.jutils.io.HasherException;
 import net.snakedoc.jutils.system.SysInfo;;
 
 public class DedupeR {
@@ -53,7 +55,7 @@ public class DedupeR {
             }
 		
 		SysInfo sys = new SysInfo();
-		DedupeSQL sql = new DedupeSQL();
+	//	DedupeSQL sql = new DedupeSQL();
 		// TODO fix CheckDedupes class
 //		CheckDupes check = new CheckDupes();
 		
@@ -93,6 +95,9 @@ public class DedupeR {
 		timer.stopTimer();
 		// TODO change to log out (info)
 		System.out.println("Total Runtime: " + timer.getTime());
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
 	}
 	/* END DEBUG MAIN() */
 	
@@ -135,6 +140,13 @@ public class DedupeR {
 					/*String hash = Hasher.hash(curFile.getPath());*/
 					/*saveHash(hash, curFile.getPatch()); */
 					System.out.println("Touched: " + curFile.getPath());
+					Hasher hasher = new Hasher();
+					try {
+                        System.out.println("Hash: " + hasher.getHash(curFile.getPath(), "SHA-512"));
+                    } catch (IOException | HasherException e) {
+                        // log out (warning)
+                        e.printStackTrace();
+                    }
 				}	
 			} catch (NullPointerException e) {
 				// TODO change to log out (warning)
