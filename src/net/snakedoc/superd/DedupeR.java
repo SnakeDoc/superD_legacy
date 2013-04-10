@@ -48,8 +48,14 @@ public class DedupeR {
 		Config config = new Config("props/superD.properties");
 		H2 db = null;
 		try {
+			System.out.println(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
+		} catch (ConfigException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
 			try {
-                db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+                db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
             } catch (ConfigException e) {
                 // TODO log out (fatal)
                 e.printStackTrace();
@@ -58,7 +64,7 @@ public class DedupeR {
 		SysInfo sys = new SysInfo();
 	//	DedupeSQL sql = new DedupeSQL();
 		// TODO fix CheckDedupes class
-		CheckDupes check = new CheckDupes();
+//		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
 		// in the argument for hashVer...
@@ -85,9 +91,9 @@ public class DedupeR {
 		
 		Schema s = new Schema();
 		String sqlSchema = s.getSchema();
-		System.out.println("\n\n\n------------------------\n" + sqlSchema);
 		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
 		try {
+			System.out.println("Running schema update on db: " + db.getDbPath());
         psSchema.execute();
 		} catch (Exception e) {
 		    e.printStackTrace();
@@ -101,7 +107,7 @@ public class DedupeR {
         
 		setup();
 		// TODO fix checkDedupes()
-		check.checkDupes();
+//		check.checkDupes();
 /*		try {
 			db.closeConnection();
 		} catch (SQLException e) {
@@ -164,7 +170,15 @@ public class DedupeR {
 				    String hash = "";
 				    try {
 				        file = curFile.getPath();
-                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
+                        hash = hasher.getHash(curFile.getPath(), "SHA-256");
+                        /* Hash Algo sizes are as follows:
+                         * MD2     - 128 bits - 32 bytes  - 32 characters
+                         * MD5     - 128 bits - 32 bytes  - 32 characters
+                         * SHA1    - 160 bits - 40 bytes  - 40 characters
+                         * SHA-256 - 256 bits - 64 bytes  - 64 characters
+                         * SHA-384 - 384 bits - 96 bytes  - 96 characters
+                         * SHA-512 - 512 bits - 128 bytes - 128 characters
+                         */
                     } catch (IOException | HasherException e1) {
                         // TODO log out (error)
                         e1.printStackTrace();

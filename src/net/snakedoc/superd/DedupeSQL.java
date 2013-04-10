@@ -16,6 +16,7 @@
 
 package net.snakedoc.superd;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -30,7 +31,7 @@ public class DedupeSQL {
 	    Config cfg = new Config("props/superD.properties");
 		H2 db = null;
 		try {
-            db = new H2(cfg.getConfig("H2_dbURL"), cfg.getConfig("H2_dbUser"), cfg.getConfig("H2_dbPass"));
+            db = new H2(new File(cfg.getConfig("H2_dbURL")).getAbsolutePath(), cfg.getConfig("H2_dbUser"), cfg.getConfig("H2_dbPass"));
         } catch (ConfigException e2) {
             // TODO log out
             e2.printStackTrace();
