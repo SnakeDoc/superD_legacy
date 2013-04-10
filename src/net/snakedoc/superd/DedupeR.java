@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.snakedoc.jutils.Config;
+import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
 import net.snakedoc.jutils.system.SysInfo;;
@@ -41,20 +42,15 @@ public class DedupeR {
 		timer.startTimer();
 		
 		// get instance of other helper objects
-		Config config = new Config();
-		config.loadConfig("props/superD.properties");
+		Config config = new Config("props/superD.properties");
 		H2 db = null;
 		try {
-			db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPort"));
-			// TODO i'm going to fix the exceptions being thrown from the database library
-			//      there needs to be added a constructor of H2() that does not read properties
-			//      so that it won't throw exceptions... therefore exceptions will be removed
-			//      from here.
-		} catch (IllegalArgumentException
-				| SecurityException | IOException e) {
-			// TODO log this
-			e.printStackTrace();
-		}
+			try {
+                db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPort"));
+            } catch (ConfigException e) {
+                // TODO log out (fatal)
+                e.printStackTrace();
+            }
 		
 		SysInfo sys = new SysInfo();
 		DedupeSQL sql = new DedupeSQL();
@@ -104,8 +100,7 @@ public class DedupeR {
 	public static void setup() {
 		
 	    // load program propterties
-	    Config config = new Config();
-	    config.loadConfig("props/superD.properties");
+	    Config config = new Config("props/superD.properties");
 	    
 		/* TODO should not be limited to 1 directory to scan
 		 * should allow deduping multiple root directories.
@@ -117,7 +112,7 @@ public class DedupeR {
 		// TODO change to user specified root directory
 		try {
             rootDirs[0] = new File(config.getConfig("ROOT"));
-        } catch (IllegalArgumentException | SecurityException | IOException e) {
+        } catch (ConfigException e) {
             // TODO log out (fatal)
             e.printStackTrace();
         }

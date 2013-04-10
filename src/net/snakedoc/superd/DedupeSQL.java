@@ -16,11 +16,10 @@
 
 package net.snakedoc.superd;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class DedupeSQL {
@@ -30,22 +29,10 @@ public class DedupeSQL {
 		H2 db = null;
 		try {
 			db = new H2();
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (ConfigException e) {
+            // TODO log out (fatal)
+            e.printStackTrace();
+        }
 		String sqlInsert = "INSERT INTO files VALUES (? , ?)";
 		PreparedStatement psInsert = null;
 		try {

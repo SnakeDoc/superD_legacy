@@ -16,89 +16,155 @@
 
 package net.snakedoc.superd;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import com.almworks.sqlite4java.SQLiteException;
-import com.almworks.sqlite4java.SQLiteStatement;
-import com.vanomaly.jutils.SQLiteUtils;
+import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
 	public static void main(String[] args) {
-		SQLiteUtils sqlA = new SQLiteUtils();
+		H2 db = null;
+        try {
+            db = new H2();
+        } catch (ConfigException e2) {
+            // TODO log out (error)
+            e2.printStackTrace();
+        }
 		CheckDupes cd = new CheckDupes();
-		sqlA.connectDB();
+		try {
+            db.openConnection();
+        } catch (ClassNotFoundException e1) {
+            // TODO log out (fatal) - means driver for database is not found
+            e1.printStackTrace();
+        } catch (SQLException e1) {
+            // TODO log out (fatal)
+            e1.printStackTrace();
+        }
 		cd.checkDupes();
-		sqlA.closeDB();
+		try {
+            db.closeConnection();
+        } catch (SQLException e) {
+            // TODO log out (warning)
+            e.printStackTrace();
+        }
 	}
 	public void checkDupes() {
-		String sqlCount = "SELECT COUNT(file_hash) FROM files;";
+		
+	    // SQL statements
+	    String sqlCount = "SELECT COUNT(file_hash) FROM files;";
 		String sqlGetHashes = "SELECT file_hash, file_path FROM files;";
 		String sqlCompare = "SELECT file_hash, file_path FROM files " +
 				"WHERE file_hash = ? AND file_path NOT LIKE ? ;";
-		SQLiteStatement psCount = null;
-		SQLiteStatement psGetHashes = null;
-		SQLiteStatement psCompare = null;
+		
+		// Prepared Statements (NULL)
+		PreparedStatement psCount = null;
+		PreparedStatement psGetHashes = null;
+		PreparedStatement psCompare = null;
+		
+		// Result Sets (NULL)
 		ResultSet rsCount = null;
 		ResultSet rsGetHashes = null;
 		ResultSet rsCompare = null;
+		
+		// Object to hold duplicate data
 		DeDupeObj[] deDupeObj = null;
+		
+		// setup some counters
 		int hash_count = 0;
-//		String[] hashes = null;
 		int loopCounter = 0;
 		int duplicateCounter = 0;
+		
+		// setup database object
+		H2 db = null;
+        try {
+            db = new H2();
+        } catch (ConfigException e2) {
+            // TODO log out (error)
+            e2.printStackTrace();
+        }
+		
+		// let's get to business...
+		
+        // initalize our prepared statements
 		try {
-			psCount = com.vanomaly.jutils.SQLiteUtils.db.prepare(sqlCount);
-			psGetHashes = com.vanomaly.jutils.SQLiteUtils.db.prepare(sqlGetHashes);
-			psCompare = com.vanomaly.jutils.SQLiteUtils.db.prepare(sqlCompare);
-		} catch (SQLiteException e) {
+			psCount = db.getConnection().prepareStatement(sqlCount);
+			psGetHashes = db.getConnection().prepareStatement(sqlGetHashes);
+			psCompare = db.getConnection().prepareStatement(sqlCompare);
+		} catch (SQLException e) {
+		    // TODO log out (error)
 			e.printStackTrace();
 		}
 		try {
-			psCount.step();
-			hash_count = psCount.columnInt(0);
-			psCount.reset();
-			psCount.dispose();
-		} catch (SQLiteException e) {
+			rsCount = psCount.executeQuery();
+			hash_count = rsCount.getInt(1);
+			psCount.clearParameters();
+			rsCount.close();
+			psCount.close();
+		} catch (SQLException e) {
+		    // TODO log out (error)
 			e.printStackTrace();
 		}
-//		hashes = new String[hash_count];
+		
+		// set deDupeObj array to size of hash_count (number of hashes in database)
 		deDupeObj = new DeDupeObj[hash_count];
+		
 		try {
-			while(psGetHashes.step()) {
+		    rsGetHashes = psGetHashes.executeQuery();
+		} catch (SQLException e) {
+		    // TODO log out (error)
+		    e.printStackTrace();
+		}
+		    
+		try {
+			while(rsGetHashes.next()) {
 				deDupeObj[loopCounter] = new DeDupeObj();
-				deDupeObj[loopCounter].filehash = psGetHashes.columnString(0);
-				deDupeObj[loopCounter].filepath = psGetHashes.columnString(1);
-				//hashes[loopCounter] = psGetHashes.columnString(0);
+				deDupeObj[loopCounter].filehash = rsGetHashes.getString(0);
+				deDupeObj[loopCounter].filepath = rsGetHashes.getString(1);
+				
 				loopCounter++;
 			}
-			psGetHashes.reset();
-			psGetHashes.dispose();
-		} catch (SQLiteException e) {
+			rsGetHashes.close();
+			psGetHashes.clearParameters();
+			psGetHashes.close();
+		} catch (SQLException e) {
+		    // TODO log out (error)
 			e.printStackTrace();
 		}
 		for (int i = 0; i < deDupeObj.length; i++) {
 			try {
-				psCompare.bind(1, deDupeObj[i].filehash);
-				psCompare.bind(2, deDupeObj[i].filepath);
-				//psCompare.step();
-				if(psCompare.step()) {
+				psCompare.setString(1, deDupeObj[i].filehash);
+				psCompare.setString(2, deDupeObj[i].filepath);
+				
+				if(psCompare.execute()) {
+				    
+				    rsCompare = psCompare.getResultSet();
+				    
+				    //TODO all sys out's change to log out (info)
 					System.out.println("DUPLICATE FOUND!");
 					duplicateCounter++;
 					System.out.println(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
-					System.out.print(psCompare.columnString(1));
+					System.out.print(rsCompare.getString(1));
 					System.out.print(" | ");
-					System.out.println(psCompare.columnString(0));
+					System.out.println(rsCompare.getString(0));
+					
+					rsCompare.close();
+					rsCompare = null;
 				}
-				psCompare.reset();
-			} catch (SQLiteException e) {
+				psCompare.clearParameters();
+			} catch (SQLException e) {
+			    // log out (warning)
 				e.printStackTrace();
+				// continue running and find next dupe
 				continue;
 			}
 		}
 		try {
-			psCompare.reset();
-			psCompare.dispose();
-		} catch (SQLiteException e) {
+			psCompare.clearParameters();
+			psCompare.close();
+		} catch (SQLException e) {
+		    //TODO log out (warning)
 			e.printStackTrace();
 		}
 		System.out.println("Number of Duplicates Found: " + duplicateCounter);

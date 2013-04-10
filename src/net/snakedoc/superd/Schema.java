@@ -16,7 +16,6 @@
 
 package net.snakedoc.superd;
 
-import net.snakedoc.jutils.database.H2;
 import net.snakedoc.jutils.io.ReadFileToString;
 
 public class Schema {
