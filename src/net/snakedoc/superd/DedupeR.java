@@ -18,6 +18,7 @@ package net.snakedoc.superd;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import net.snakedoc.jutils.Config;
@@ -48,16 +49,16 @@ public class DedupeR {
 		H2 db = null;
 		try {
 			try {
-                db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPort"));
+                db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
             } catch (ConfigException e) {
                 // TODO log out (fatal)
                 e.printStackTrace();
             }
-		
+			
 		SysInfo sys = new SysInfo();
 	//	DedupeSQL sql = new DedupeSQL();
 		// TODO fix CheckDedupes class
-//		CheckDupes check = new CheckDupes();
+		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
 		// in the argument for hashVer...
@@ -81,16 +82,33 @@ public class DedupeR {
 			// TODO change to log out (fatal)
 			e.printStackTrace();
 		}
+		
+		Schema s = new Schema();
+		String sqlSchema = s.getSchema();
+		System.out.println("\n\n\n------------------------\n" + sqlSchema);
+		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+		try {
+        psSchema.execute();
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+        try {
+            db.closeConnection();
+        } catch (SQLException e) {
+            // TODO change to log out (warning)
+            e.printStackTrace();
+        }
+        
 		setup();
 		// TODO fix checkDedupes()
-//		check.checkDupes();
-		try {
+		check.checkDupes();
+/*		try {
 			db.closeConnection();
 		} catch (SQLException e) {
 			// TODO change to log out (warning)
 			e.printStackTrace();
 		}
-		
+*/		
 		// stop timer
 		timer.stopTimer();
 		// TODO change to log out (info)
@@ -127,6 +145,9 @@ public class DedupeR {
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
 	public static void walk(File path){
 		
+	    Hasher hasher = new Hasher();
+	    DedupeSQL sql = new DedupeSQL();
+	    
 		int i=0;
 
 		File[] contents = path.listFiles();
@@ -139,16 +160,21 @@ public class DedupeR {
 					/*hash file here and store to SQL database*/
 					/*String hash = Hasher.hash(curFile.getPath());*/
 					/*saveHash(hash, curFile.getPatch()); */
-					System.out.println("Touched: " + curFile.getPath());
-					Hasher hasher = new Hasher();
-					try {
-                        System.out.println("Hash: " + hasher.getHash(curFile.getPath(), "SHA-512"));
-                    } catch (IOException | HasherException e) {
-                        // log out (warning)
-                        e.printStackTrace();
+				    String file = "";
+				    String hash = "";
+				    try {
+				        file = curFile.getPath();
+                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
+                    } catch (IOException | HasherException e1) {
+                        // TODO log out (error)
+                        e1.printStackTrace();
                     }
+				    
+				    sql.writeRecord(file, hash);
+				    
+					System.out.println("File: " + file + "\n\t Hash: " + hash);
 				}	
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				// TODO change to log out (warning)
 				e.printStackTrace();
 				System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + 

@@ -20,43 +20,45 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
 	public static void main(String[] args) {
-		H2 db = null;
-        try {
-            db = new H2();
-        } catch (ConfigException e2) {
-            // TODO log out (error)
-            e2.printStackTrace();
-        }
+//	    Config config = new Config("props/superD.properties");
+//		H2 db = null;
+ //       try {
+  //          db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+   //     } catch (ConfigException e2) {
+    //        // TODO log out (error)
+     //       e2.printStackTrace();
+      //  }
 		CheckDupes cd = new CheckDupes();
-		try {
-            db.openConnection();
-        } catch (ClassNotFoundException e1) {
-            // TODO log out (fatal) - means driver for database is not found
-            e1.printStackTrace();
-        } catch (SQLException e1) {
-            // TODO log out (fatal)
-            e1.printStackTrace();
-        }
+//		try {
+ //           db.openConnection();
+  //      } catch (ClassNotFoundException e1) {
+   //         // TODO log out (fatal) - means driver for database is not found
+    //        e1.printStackTrace();
+     //   } catch (SQLException e1) {
+       //     // TODO log out (fatal)
+        //    e1.printStackTrace();
+   //     }
 		cd.checkDupes();
-		try {
-            db.closeConnection();
-        } catch (SQLException e) {
-            // TODO log out (warning)
-            e.printStackTrace();
-        }
+//		try {
+ //           db.closeConnection();
+  //      } catch (SQLException e) {
+    //        // TODO log out (warning)
+     //       e.printStackTrace();
+      //  }
 	}
 	public void checkDupes() {
-		
+	    Config config = new Config("props/superD.properties");
 	    // SQL statements
-	    String sqlCount = "SELECT COUNT(file_hash) FROM files;";
-		String sqlGetHashes = "SELECT file_hash, file_path FROM files;";
+	    String sqlCount = "SELECT COUNT(file_hash) FROM files";
+		String sqlGetHashes = "SELECT file_hash, file_path FROM files";
 		String sqlCompare = "SELECT file_hash, file_path FROM files " +
-				"WHERE file_hash = ? AND file_path NOT LIKE ? ;";
+				"WHERE file_hash = ? AND file_path NOT LIKE ?";
 		
 		// Prepared Statements (NULL)
 		PreparedStatement psCount = null;
@@ -79,10 +81,19 @@ public class CheckDupes {
 		// setup database object
 		H2 db = null;
         try {
-            db = new H2();
+            db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
         } catch (ConfigException e2) {
             // TODO log out (error)
             e2.printStackTrace();
+        }
+        try {
+            db.openConnection();
+        } catch (ClassNotFoundException e1) {
+            // TODO log out (fatal) - means driver for database is not found
+            e1.printStackTrace();
+        } catch (SQLException e1) {
+            // TODO log out (fatal)
+            e1.printStackTrace();
         }
 		
 		// let's get to business...
@@ -98,6 +109,7 @@ public class CheckDupes {
 		}
 		try {
 			rsCount = psCount.executeQuery();
+			// REPLACE WITH LIST<> or HASHMAP //
 			hash_count = rsCount.getInt(1);
 			psCount.clearParameters();
 			rsCount.close();
@@ -168,5 +180,11 @@ public class CheckDupes {
 			e.printStackTrace();
 		}
 		System.out.println("Number of Duplicates Found: " + duplicateCounter);
+		try {
+            db.closeConnection();
+        } catch (SQLException e) {
+            // TODO log out (warning)
+            e.printStackTrace();
+        }
 	}
 }

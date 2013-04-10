@@ -19,6 +19,7 @@ package net.snakedoc.superd;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
@@ -26,14 +27,23 @@ public class DedupeSQL {
 	
 	public void writeRecord(String file, String hash) {
 		
+	    Config cfg = new Config("props/superD.properties");
 		H2 db = null;
 		try {
-			db = new H2();
-		} catch (ConfigException e) {
-            // TODO log out (fatal)
-            e.printStackTrace();
+            db = new H2(cfg.getConfig("H2_dbURL"), cfg.getConfig("H2_dbUser"), cfg.getConfig("H2_dbPass"));
+        } catch (ConfigException e2) {
+            // TODO log out
+            e2.printStackTrace();
         }
-		String sqlInsert = "INSERT INTO files VALUES (? , ?)";
+		
+       // db.setTargetCfg("props/supderD.properties");
+        try {
+            db.openConnection();
+        } catch (ClassNotFoundException | SQLException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+		String sqlInsert = "INSERT INTO files (file_path, file_hash) VALUES (? , ?)";
 		PreparedStatement psInsert = null;
 		try {
 			psInsert = db.getConnection().prepareStatement(sqlInsert);
@@ -46,7 +56,7 @@ public class DedupeSQL {
 			psInsert.setString(1, file);
 			psInsert.setString(2, hash);
 			// debug log here saying about to write record
-			psInsert.executeQuery();	
+			psInsert.executeUpdate();	
 		} catch (SQLException e) {
 			// convert to log out (error)
 			e.printStackTrace();

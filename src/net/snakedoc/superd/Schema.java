@@ -21,8 +21,7 @@ import net.snakedoc.jutils.io.ReadFileToString;
 public class Schema {
 	public String getSchema() {
 		ReadFileToString readFile = new ReadFileToString();
-		System.out.println(cleanString(readFile.readFromFile("dbSchema.sql"), "\\n"));
-		return "";
+		return cleanString(readFile.readFromFile("schema.sql"), "\\n");
 	}
 	public String cleanString(String input, String stripChars) {
 		String output = "";
