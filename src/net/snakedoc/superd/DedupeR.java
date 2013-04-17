@@ -27,7 +27,7 @@ import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
 import net.snakedoc.jutils.io.Hasher;
 import net.snakedoc.jutils.io.HasherException;
-import net.snakedoc.jutils.system.SysInfo;;
+import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
