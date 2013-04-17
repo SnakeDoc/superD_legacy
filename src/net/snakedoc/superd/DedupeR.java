@@ -94,7 +94,8 @@ public class DedupeR {
 		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
 		try {
 			System.out.println("Running schema update on db: " + db.getDbPath());
-        psSchema.execute();
+			psSchema.execute();
+			System.out.println("Schema update complete!");
 		} catch (Exception e) {
 		    e.printStackTrace();
 		}
@@ -170,7 +171,8 @@ public class DedupeR {
 				    String hash = "";
 				    try {
 				        file = curFile.getPath();
-                        hash = hasher.getHash(curFile.getPath(), "SHA-256");
+				        System.out.print("File: " + file);
+                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
                         /* Hash Algo sizes are as follows:
                          * MD2     - 128 bits - 32 bytes  - 32 characters
                          * MD5     - 128 bits - 32 bytes  - 32 characters
@@ -186,7 +188,7 @@ public class DedupeR {
 				    
 				    sql.writeRecord(file, hash);
 				    
-					System.out.println("File: " + file + "\n\t Hash: " + hash);
+					System.out.println("\n\t Hash: " + hash);
 				}	
 			} catch (Exception e) {
 				// TODO change to log out (warning)
