@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright 2013 Jason Sipula and Trace Hagan                                *
+ *  Copyright 2013 Jason Sipula, Trace Hagan                                   *
  *                                                                             *
  *  Licensed under the Apache License, Version 2.0 (the "License");            *
  *  you may not use this file except in compliance with the License.           *
@@ -18,30 +18,37 @@ package net.snakedoc.superd;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-import com.almworks.sqlite4java.SQLiteStatement;
-import com.vanomaly.jutils.DirectoryScanner;
-import com.vanomaly.jutils.Hasher;
+import net.snakedoc.jutils.io.DirectoryScanner;
+import net.snakedoc.jutils.io.HasherException;
+import net.snakedoc.jutils.io.Hasher;
 
 public class ScanFiles extends DirectoryScanner {
-	public static File[] scanFiles(String dir, DeDupeObj[] deDupeObj, 
-			SQLiteStatement st) throws IOException {
+	public static List<File> scanFiles(String dir, DeDupeObj[] deDupeObj) throws IOException {
 		//DedupeR.count++;
 		System.out.println("SCANFILES CLASS");
-		DeDupeSQL sql = new DeDupeSQL();
+		DedupeSQL sql = new DedupeSQL();
 		Hasher getHash = new Hasher();
-		File[] files = DirectoryScanner.getList(dir, st);
-		System.out.println(files.length);
-		for (int i = 0; i < files.length; i++) {
-			DedupeR.count++;
+		DirectoryScanner dirScan = new DirectoryScanner();
+		List<File> files = dirScan.getList(dir);
+		System.out.println(files.size());
+		for (int i = 0; i < files.size(); i++) {
+//			DedupeR.count++;
 			System.out.println(i);
-			if (files[i].isFile() && files[i].canRead()) {
-				String file = files[i].toString();
-				String hash = getHash.getSHA256(files[i].toString());
-				sql.sqlDB(st, file, hash);
-				DedupeR.count++;
-				System.out.println("Processing: \n\tFile: " + deDupeObj[DedupeR.count].filepath
-						+ "\n\tHash: " + deDupeObj[DedupeR.count].filehash);
+			if (files.get(i).isFile() && files.get(i).canRead()) {
+				String file = files.get(i).toString();
+				String hash = "";
+                try {
+                    hash = getHash.getHash(files.get(i).toString(), "SHA-512");
+                } catch (HasherException e) {
+                    //TODO log out
+                    e.printStackTrace();
+                }
+				sql.writeRecord(file, hash);
+//				DedupeR.count++;
+//				System.out.println("Processing: \n\tFile: " + deDupeObj[DedupeR.count].filepath
+//						+ "\n\tHash: " + deDupeObj[DedupeR.count].filehash);
 			}
 		}
 		return files;

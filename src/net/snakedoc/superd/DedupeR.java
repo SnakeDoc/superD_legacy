@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright 2013 Jason Sipula and Trace Hagan                                *
+ *  Copyright 2013 Jason Sipula, Trace Hagan                                   *
  *                                                                             *
  *  Licensed under the Apache License, Version 2.0 (the "License");            *
  *  you may not use this file except in compliance with the License.           *
@@ -17,14 +17,17 @@
 package net.snakedoc.superd;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import net.snakedoc.jutils.Config;
+import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
-import net.snakedoc.jutils.system.SysInfo;;
+import net.snakedoc.jutils.io.Hasher;
+import net.snakedoc.jutils.io.HasherException;
+import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
@@ -42,23 +45,24 @@ public class DedupeR {
 		timer.startTimer();
 		
 		// get instance of other helper objects
-		Config config = new Config();
-		config.loadConfig("props/superD.properties");
+		Config config = new Config("props/superD.properties");
 		H2 db = null;
 		try {
-			db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPort"));
-			// TODO i'm going to fix the exceptions being thrown from the database library
-			//      there needs to be added a constructor of H2() that does not read properties
-			//      so that it won't throw exceptions... therefore exceptions will be removed
-			//      from here.
-		} catch (IllegalArgumentException
-				| SecurityException | IOException e) {
-			// TODO log this
-			e.printStackTrace();
+			System.out.println(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
+		} catch (ConfigException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		
+		try {
+			try {
+                db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+            } catch (ConfigException e) {
+                // TODO log out (fatal)
+                e.printStackTrace();
+            }
+			
 		SysInfo sys = new SysInfo();
-		DedupeSQL sql = new DedupeSQL();
+	//	DedupeSQL sql = new DedupeSQL();
 		// TODO fix CheckDedupes class
 //		CheckDupes check = new CheckDupes();
 		
@@ -84,20 +88,41 @@ public class DedupeR {
 			// TODO change to log out (fatal)
 			e.printStackTrace();
 		}
+		
+		Schema s = new Schema();
+		String sqlSchema = s.getSchema();
+		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+		try {
+			System.out.println("Running schema update on db: " + db.getDbPath());
+			psSchema.execute();
+			System.out.println("Schema update complete!");
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+        try {
+            db.closeConnection();
+        } catch (SQLException e) {
+            // TODO change to log out (warning)
+            e.printStackTrace();
+        }
+        
 		setup();
 		// TODO fix checkDedupes()
 //		check.checkDupes();
-		try {
+/*		try {
 			db.closeConnection();
 		} catch (SQLException e) {
 			// TODO change to log out (warning)
 			e.printStackTrace();
 		}
-		
+*/		
 		// stop timer
 		timer.stopTimer();
 		// TODO change to log out (info)
 		System.out.println("Total Runtime: " + timer.getTime());
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
 	}
 	/* END DEBUG MAIN() */
 	
@@ -105,8 +130,7 @@ public class DedupeR {
 	public static void setup() {
 		
 	    // load program propterties
-	    Config config = new Config();
-	    config.loadConfig("props/superD.properties");
+	    Config config = new Config("props/superD.properties");
 	    
 		/* TODO should not be limited to 1 directory to scan
 		 * should allow deduping multiple root directories.
@@ -118,7 +142,7 @@ public class DedupeR {
 		// TODO change to user specified root directory
 		try {
             rootDirs[0] = new File(config.getConfig("ROOT"));
-        } catch (IllegalArgumentException | SecurityException | IOException e) {
+        } catch (ConfigException e) {
             // TODO log out (fatal)
             e.printStackTrace();
         }
@@ -128,6 +152,9 @@ public class DedupeR {
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
 	public static void walk(File path){
 		
+	    Hasher hasher = new Hasher();
+	    DedupeSQL sql = new DedupeSQL();
+	    
 		int i=0;
 
 		File[] contents = path.listFiles();
@@ -140,9 +167,30 @@ public class DedupeR {
 					/*hash file here and store to SQL database*/
 					/*String hash = Hasher.hash(curFile.getPath());*/
 					/*saveHash(hash, curFile.getPatch()); */
-					System.out.println("Touched: " + curFile.getPath());
+				    String file = "";
+				    String hash = "";
+				    try {
+				        file = curFile.getPath();
+				        System.out.print("File: " + file);
+                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
+                        /* Hash Algo sizes are as follows:
+                         * MD2     - 128 bits - 32 bytes  - 32 characters
+                         * MD5     - 128 bits - 32 bytes  - 32 characters
+                         * SHA1    - 160 bits - 40 bytes  - 40 characters
+                         * SHA-256 - 256 bits - 64 bytes  - 64 characters
+                         * SHA-384 - 384 bits - 96 bytes  - 96 characters
+                         * SHA-512 - 512 bits - 128 bytes - 128 characters
+                         */
+                    } catch (IOException | HasherException e1) {
+                        // TODO log out (error)
+                        e1.printStackTrace();
+                    }
+				    
+				    sql.writeRecord(file, hash);
+				    
+					System.out.println("\n\t Hash: " + hash);
 				}	
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				// TODO change to log out (warning)
 				e.printStackTrace();
 				System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + 
