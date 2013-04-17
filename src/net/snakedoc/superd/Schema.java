@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright 2013 Jason Sipula and Trace Hagan                                *
+ *  Copyright 2013 Jason Sipula, Trace Hagan                                   *
  *                                                                             *
  *  Licensed under the Apache License, Version 2.0 (the "License");            *
  *  you may not use this file except in compliance with the License.           *
@@ -16,14 +16,12 @@
 
 package net.snakedoc.superd;
 
-import net.snakedoc.jutils.database.H2;
 import net.snakedoc.jutils.io.ReadFileToString;
 
 public class Schema {
 	public String getSchema() {
 		ReadFileToString readFile = new ReadFileToString();
-		System.out.println(cleanString(readFile.readFromFile("dbSchema.sql"), "\\n"));
-		return "";
+		return cleanString(readFile.readFromFile("schema.sql"), "\\n");
 	}
 	public String cleanString(String input, String stripChars) {
 		String output = "";
