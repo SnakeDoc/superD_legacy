@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
-import net.snakedoc.jutils.system.SysInfo;;
+import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
