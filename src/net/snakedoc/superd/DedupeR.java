@@ -54,6 +54,8 @@ public class DedupeR {
 		// get instance of other helper objects
 		Config config = new Config("props/superD.properties");
 		config.loadConfig("props/log4j.properties");
+		log.info("\n\n");
+		log.info("Starting program!");
 		H2 db = null;
 		try {
 			log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
@@ -69,7 +71,6 @@ public class DedupeR {
 			
 		SysInfo sys = new SysInfo();
 	//	DedupeSQL sql = new DedupeSQL();
-		// TODO fix CheckDedupes class
 		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
@@ -112,13 +113,6 @@ public class DedupeR {
         
 		setup();
 		check.checkDupes();
-/*		try {
-			db.closeConnection();
-		} catch (SQLException e) {
-			// TODO change to log out (warning)
-			e.printStackTrace();
-		}
-*/		
 		// stop timer
 		timer.stopTimer();
 		log.info("Total Runtime: " + timer.getTime());

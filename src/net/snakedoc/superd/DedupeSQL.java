@@ -20,47 +20,47 @@ import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class DedupeSQL {
+    
+    private static final Logger log = Logger.getLogger(DedupeSQL.class);
 	
 	public void writeRecord(String file, String hash) {
 		
 	    Config cfg = new Config("props/superD.properties");
+	    cfg.loadConfig("props/log4j.properties");
 		H2 db = null;
 		try {
             db = new H2(new File(cfg.getConfig("H2_dbURL")).getAbsolutePath(), cfg.getConfig("H2_dbUser"), cfg.getConfig("H2_dbPass"));
         } catch (ConfigException e2) {
-            // TODO log out
-            e2.printStackTrace();
+            log.fatal("Failed to read config file!", e2);
         }
 		
-       // db.setTargetCfg("props/supderD.properties");
         try {
             db.openConnection();
         } catch (ClassNotFoundException | SQLException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.fatal("Failed to open database connection!", e1);
         }
 		String sqlInsert = "INSERT INTO files (file_path, file_hash) VALUES (? , ?)";
 		PreparedStatement psInsert = null;
 		try {
 			psInsert = db.getConnection().prepareStatement(sqlInsert);
 		} catch (SQLException e) {
-			// convert to log out (fatal)
-			e.printStackTrace();
+			log.error("Failed to set databse query!", e);
 		}
 		
 		try {
 			psInsert.setString(1, file);
 			psInsert.setString(2, hash);
-			// debug log here saying about to write record
+			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
 			psInsert.executeUpdate();	
 		} catch (SQLException e) {
-			// convert to log out (error)
-			e.printStackTrace();
+			log.error("Failed to query database!", e);
 		}
 	}
 }

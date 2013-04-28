@@ -21,40 +21,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
+    
+    private static final Logger log = Logger.getLogger(CheckDupes.class);
+    
 	public static void main(String[] args) {
-//	    Config config = new Config("props/superD.properties");
-//		H2 db = null;
- //       try {
-  //          db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
-   //     } catch (ConfigException e2) {
-    //        // TODO log out (error)
-     //       e2.printStackTrace();
-      //  }
 		CheckDupes cd = new CheckDupes();
-//		try {
- //           db.openConnection();
-  //      } catch (ClassNotFoundException e1) {
-   //         // TODO log out (fatal) - means driver for database is not found
-    //        e1.printStackTrace();
-     //   } catch (SQLException e1) {
-       //     // TODO log out (fatal)
-        //    e1.printStackTrace();
-   //     }
 		cd.checkDupes();
-//		try {
- //           db.closeConnection();
-  //      } catch (SQLException e) {
-    //        // TODO log out (warning)
-     //       e.printStackTrace();
-      //  }
 	}
 	public void checkDupes() {
 	    Config config = new Config("props/superD.properties");
+	    config.loadConfig("props/log4j.properties");
 	    // SQL statements
 	    String sqlCount = "SELECT COUNT(*) FROM files";
 		String sqlGetHashes = "SELECT file_hash, file_path FROM files";
@@ -85,17 +68,15 @@ public class CheckDupes {
             db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(),
                             config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
         } catch (ConfigException e2) {
-            // TODO log out (error)
-            e2.printStackTrace();
+            log.error("Failed to read config file!", e2);
         }
         try {
             db.openConnection();
         } catch (ClassNotFoundException e1) {
-            // TODO log out (fatal) - means driver for database is not found
-            e1.printStackTrace();
+            // means driver for database is not found
+            log.fatal("Failed to read the database!", e1);
         } catch (SQLException e1) {
-            // TODO log out (fatal)
-            e1.printStackTrace();
+            log.fatal("Failed to open database!", e1);
         }
 		
 		// let's get to business...
@@ -106,8 +87,7 @@ public class CheckDupes {
 			psGetHashes = db.getConnection().prepareStatement(sqlGetHashes);
 			psCompare = db.getConnection().prepareStatement(sqlCompare);
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error setting database statements!", e);
 		}
 		try {
 			rsCount = psCount.executeQuery();
@@ -118,8 +98,7 @@ public class CheckDupes {
 			rsCount.close();
 			psCount.close();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error running database queries!", e);
 		}
 		
 		// set deDupeObj array to size of hash_count (number of hashes in database)
@@ -128,8 +107,7 @@ public class CheckDupes {
 		try {
 		    rsGetHashes = psGetHashes.executeQuery();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-		    e.printStackTrace();
+		    log.error("Error running database queries!", e);
 		}
 		    
 		try {
@@ -144,8 +122,7 @@ public class CheckDupes {
 			psGetHashes.clearParameters();
 			psGetHashes.close();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error running database queries!", e);
 		}
 		for (int i = 0; i < deDupeObj.length; i++) {
 			try {
@@ -153,28 +130,22 @@ public class CheckDupes {
 				psCompare.setString(2, deDupeObj[i].filepath);
 				
 				rsCompare = psCompare.executeQuery();
-				
-				//if(psCompare.execute()) {
 				    
-				  //  rsCompare = psCompare.getResultSet();
+				while(rsCompare != null && rsCompare.next()) {
 				    
-				    while(rsCompare != null && rsCompare.next()) {
-				    
-				    //TODO all sys out's change to log out (info)
-					System.out.println("DUPLICATE FOUND!");
+					log.info("DUPLICATE FOUND!");
 					duplicateCounter++;
-					System.out.println(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
-					System.out.print(rsCompare.getString(1));
-					System.out.println("");
-					System.out.println(deDupeObj[i].filepath + " | " + rsCompare.getString(2));
+					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
+					log.debug(rsCompare.getString(1));
+					log.debug("");
+					log.info(deDupeObj[i].filepath + " | " + rsCompare.getString(2));
 					
 					rsCompare.close();
 					rsCompare = null;
 				}
 				psCompare.clearParameters();
 			} catch (SQLException e) {
-			    // log out (warning)
-				e.printStackTrace();
+				log.warn("Failed to query database!", e);
 				// continue running and find next dupe
 				continue;
 			}
@@ -183,18 +154,16 @@ public class CheckDupes {
 			psCompare.clearParameters();
 			psCompare.close();
 		} catch (SQLException e) {
-		    //TODO log out (warning)
-			e.printStackTrace();
+			log.warn("Failed to close resource!", e);
 		}
-		System.out.println("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-		System.out.print("Number of Duplicates Found: " + duplicateCounter);
-		System.out.print(" out of " + hash_count + " files");
-		System.out.printf("\nThat means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100));
+		log.info("\n\n\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		log.info("Number of Duplicates Found: " + duplicateCounter);
+		log.info(" out of " + hash_count + " files");
+		log.info(String.format("\nThat means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100)));
 		try {
             db.closeConnection();
         } catch (SQLException e) {
-            // TODO log out (warning)
-            e.printStackTrace();
+            log.warn("Failed to close resource!", e);
         }
 	}
 }
