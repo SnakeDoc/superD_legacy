@@ -15,9 +15,9 @@
     <tstamp>
     	<format property="build.datestamp" pattern="yyyy-MM-dd" locale="en,US"/>
     </tstamp>
-    <path id="superd.classpath">
+    <path id="superD.classpath">
         <pathelement location="bin"/>
-        <pathelement location="lib/**"/>
+        <pathelement location="lib"/>
     </path>
     <target name="init">
         <mkdir dir="${dest_dir}"/>
