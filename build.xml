@@ -15,7 +15,7 @@
     <tstamp>
     	<format property="build.datestamp" pattern="yyyy-MM-dd" locale="en,US"/>
     </tstamp>
-    <path id="JUtils.classpath">
+    <path id="superd.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib"/>
     </path>
@@ -61,7 +61,7 @@
     <target name="create_manifest">
         <manifest file="${dest_dir}/${tmp_dir}/META-INF/MANIFEST.MF">
             <attribute name="Manifest-Version" value="1.0"/>
-            <attribute name="Project-Website" value="www.snakedoc.net"/>
+            <attribute name="Website" value="www.snakedoc.net"/>
             <attribute name="Project" value="${proj_name}-${version_major}.${version_minor}.${version_sub}"/>
         </manifest>
     </target>
@@ -76,7 +76,7 @@
 		<move file="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip" todir="${DEPLOY_DIR}"/>
 		<echo>Nightly build deployed successfully!</echo>
 	</target>
-	<target depends="jar, javadoc" name="pkg-distro" description="Build the distributable ZIP for JUtils">
+	<target depends="jar, javadoc" name="pkg-distro" description="Build the distributable ZIP for superD">
 	    <zip destfile="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip">
 	        <fileset file="LICENSE"/>
 	    	<fileset file="README"/>
