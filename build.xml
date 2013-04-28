@@ -100,6 +100,12 @@
 	                <include name ="**/*"/>
 	            </patternset>
 	        </zipfileset>
+	    	<zipfileset dir="${dest_dir}/${tmp_dir}/db" prefix="db">
+	            <patternset id="superd.dist.db">
+	    		    <exclude name =".keepme"/>
+	    		    <include name ="**/*"/>
+	    		</patternset>
+	        </zipfileset>
 	    	<zipfileset dir="${dest_dir}/${tmp_dir}/src" prefix="src">
 	            <patternset id="superd.dist.src">
 	    		    <include name ="**/*.java"/>
