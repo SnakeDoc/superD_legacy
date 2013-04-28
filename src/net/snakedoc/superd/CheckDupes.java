@@ -81,7 +81,7 @@ public class CheckDupes {
 		
 		// let's get to business...
 		
-        // initalize our prepared statements
+        // initialize our prepared statements
 		try {
 			psCount = db.getConnection().prepareStatement(sqlCount);
 			psGetHashes = db.getConnection().prepareStatement(sqlGetHashes);
@@ -132,7 +132,7 @@ public class CheckDupes {
 				rsCompare = psCompare.executeQuery();
 				    
 				while(rsCompare != null && rsCompare.next()) {
-				    
+				    //TODO write all duplicates to new table in DATABASE for later possible deletion
 					log.info("DUPLICATE FOUND!");
 					duplicateCounter++;
 					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
