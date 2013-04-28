@@ -138,25 +138,34 @@ public class DedupeR {
             String dil = new String(config.getConfig("ROOT_DIL"));
             String rootDirList = new String(config.getConfig("ROOT"));
             List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
-            System.out.println(rootDirList);
-            System.out.println(rootDirListArr.size());
+
             for (int i=0; i < rootDirListArr.size(); i++){
                 rootDirs.add(new File(rootDirListArr.get(i)));
             }
         } catch (ConfigException e) {
             log.fatal("Failed to read config file!", e);
         }
-        for (int i=0; i < rootDirs.size(); i++){
-		    walk(rootDirs.get(i));
+        try{
+            for (int i=0; i < rootDirs.size(); i++){
+                //make sure that it is a directory
+                if (rootDirs.get(i).isDirectory()){
+                    walk(rootDirs.get(i));
+                } else {
+                    log.debug(rootDirs.get(i).toString() + "  Appears to not be a directory; skipping to next in list");
+                }
+            }
+        //lets make sure we didn't accidentally put in an invalid path
+	    }catch(Exception e){
+            e.printStackTrace();
         }
-	}
+    }
 	
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
 	public static void walk(File path){
 		
 	    Hasher hasher = new Hasher();
 	    DedupeSQL sql = new DedupeSQL();
-	    
+        Config config = new Config("props/superD.properties");
 		int i=0;
 
 		File[] contents = path.listFiles();
@@ -166,23 +175,15 @@ public class DedupeR {
 				if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
 					walk(curFile);
 				} else if (!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
-					/*hash file here and store to SQL database*/
-					/*String hash = Hasher.hash(curFile.getPath());*/
-					/*saveHash(hash, curFile.getPatch()); */
+
+                    //reads in HASH_ALGO from Prop File to decide which algorithm to use
+                    String hashAlgo = new String(config.getConfig("HASH_ALGO"));
 				    String file = "";
 				    String hash = "";
 				    try {
 				        file = curFile.getPath();
 				        log.debug("File: " + file);
-                        hash = hasher.getHash(curFile.getPath(), "SHA-512", BUFFER);
-                        /* Hash Algo sizes are as follows:
-                         * MD2     - 128 bits - 32 bytes  - 32 characters
-                         * MD5     - 128 bits - 32 bytes  - 32 characters
-                         * SHA1    - 160 bits - 40 bytes  - 40 characters
-                         * SHA-256 - 256 bits - 64 bytes  - 64 characters
-                         * SHA-384 - 384 bits - 96 bytes  - 96 characters
-                         * SHA-512 - 512 bits - 128 bytes - 128 characters
-                         */
+                        hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
                     } catch (IOException | HasherException e1) {
                         log.error("Failed to access and/or hash file!", e1);
                     }
