@@ -9,7 +9,7 @@
     <property name="dest_dir" value="target"/>
     <property name="tmp_dir" value="tmp"/>
     <property name="proj_name" value="superD"/>
-	<proptery name="version_major" value="0"/>
+	<property name="version_major" value="0"/>
 	<property name="version_minor" value="1"/>
 	<property name="version_sub" value="${env.BUILD_NUMBER}"/>
     <tstamp>
