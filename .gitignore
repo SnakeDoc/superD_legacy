@@ -13,3 +13,4 @@ src/testing
 .idea
 out/
 superD.iml
+*.log*
