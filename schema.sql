@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS files;
 CREATE TABLE files
 (
  record_id INT PRIMARY KEY AUTO_INCREMENT,
- file_path VARCHAR(767) UNIQUE,
- file_hash char(128)
+ file_path VARCHAR(2000) UNIQUE,
+ file_hash VARCHAR(128)
 );
 
 CREATE TABLE duplicates

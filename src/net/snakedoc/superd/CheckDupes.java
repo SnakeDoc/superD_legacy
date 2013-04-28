@@ -16,6 +16,7 @@
 
 package net.snakedoc.superd;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,10 +56,10 @@ public class CheckDupes {
 	public void checkDupes() {
 	    Config config = new Config("props/superD.properties");
 	    // SQL statements
-	    String sqlCount = "SELECT COUNT(file_hash) FROM files";
+	    String sqlCount = "SELECT COUNT(*) FROM files";
 		String sqlGetHashes = "SELECT file_hash, file_path FROM files";
 		String sqlCompare = "SELECT file_hash, file_path FROM files " +
-				"WHERE file_hash = ? AND file_path NOT LIKE ?";
+				"WHERE file_hash = ? AND file_path != ?";
 		
 		// Prepared Statements (NULL)
 		PreparedStatement psCount = null;
@@ -81,7 +82,8 @@ public class CheckDupes {
 		// setup database object
 		H2 db = null;
         try {
-            db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+            db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(),
+                            config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
         } catch (ConfigException e2) {
             // TODO log out (error)
             e2.printStackTrace();
@@ -109,6 +111,7 @@ public class CheckDupes {
 		}
 		try {
 			rsCount = psCount.executeQuery();
+			rsCount.next();
 			// REPLACE WITH LIST<> or HASHMAP //
 			hash_count = rsCount.getInt(1);
 			psCount.clearParameters();
@@ -132,8 +135,8 @@ public class CheckDupes {
 		try {
 			while(rsGetHashes.next()) {
 				deDupeObj[loopCounter] = new DeDupeObj();
-				deDupeObj[loopCounter].filehash = rsGetHashes.getString(0);
-				deDupeObj[loopCounter].filepath = rsGetHashes.getString(1);
+				deDupeObj[loopCounter].filehash = rsGetHashes.getString(1);
+				deDupeObj[loopCounter].filepath = rsGetHashes.getString(2);
 				
 				loopCounter++;
 			}
@@ -149,17 +152,21 @@ public class CheckDupes {
 				psCompare.setString(1, deDupeObj[i].filehash);
 				psCompare.setString(2, deDupeObj[i].filepath);
 				
-				if(psCompare.execute()) {
+				rsCompare = psCompare.executeQuery();
+				
+				//if(psCompare.execute()) {
 				    
-				    rsCompare = psCompare.getResultSet();
+				  //  rsCompare = psCompare.getResultSet();
+				    
+				    while(rsCompare != null && rsCompare.next()) {
 				    
 				    //TODO all sys out's change to log out (info)
 					System.out.println("DUPLICATE FOUND!");
 					duplicateCounter++;
 					System.out.println(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
 					System.out.print(rsCompare.getString(1));
-					System.out.print(" | ");
-					System.out.println(rsCompare.getString(0));
+					System.out.println("");
+					System.out.println(deDupeObj[i].filepath + " | " + rsCompare.getString(2));
 					
 					rsCompare.close();
 					rsCompare = null;
@@ -179,7 +186,9 @@ public class CheckDupes {
 		    //TODO log out (warning)
 			e.printStackTrace();
 		}
-		System.out.println("Number of Duplicates Found: " + duplicateCounter);
+		System.out.print("Number of Duplicates Found: " + duplicateCounter);
+		System.out.print(" out of " + hash_count + " files");
+		System.out.printf("\nThat's means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100));
 		try {
             db.closeConnection();
         } catch (SQLException e) {

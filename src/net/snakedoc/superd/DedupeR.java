@@ -31,6 +31,9 @@ import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
+    private final static int BUFFER = 16384; // Buffer size in Bytes to use in hashing algorithm.
+                                             // Has the potential to directly impact performance.
+    
 	/* THIS IS DEBUG MAIN()
 	 * This should not be left in for deployment, only for development
 	 * Logic in main() should be moved to it's own driver method so it can be invoked
@@ -64,7 +67,7 @@ public class DedupeR {
 		SysInfo sys = new SysInfo();
 	//	DedupeSQL sql = new DedupeSQL();
 		// TODO fix CheckDedupes class
-//		CheckDupes check = new CheckDupes();
+		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
 		// in the argument for hashVer...
@@ -108,7 +111,7 @@ public class DedupeR {
         
 		setup();
 		// TODO fix checkDedupes()
-//		check.checkDupes();
+		check.checkDupes();
 /*		try {
 			db.closeConnection();
 		} catch (SQLException e) {
@@ -172,7 +175,7 @@ public class DedupeR {
 				    try {
 				        file = curFile.getPath();
 				        System.out.print("File: " + file);
-                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
+                        hash = hasher.getHash(curFile.getPath(), "SHA-512", BUFFER);
                         /* Hash Algo sizes are as follows:
                          * MD2     - 128 bits - 32 bytes  - 32 characters
                          * MD5     - 128 bits - 32 bytes  - 32 characters
