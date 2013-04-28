@@ -22,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
@@ -34,6 +36,8 @@ public class DedupeR {
 
     private final static int BUFFER = 16384; // Buffer size in Bytes to use in hashing algorithm.
                                              // Has the potential to directly impact performance.
+    
+    private static final Logger log = Logger.getLogger(DedupeR.class);
     
 	/* THIS IS DEBUG MAIN()
 	 * This should not be left in for deployment, only for development
@@ -50,24 +54,24 @@ public class DedupeR {
 		
 		// get instance of other helper objects
 		Config config = new Config("props/superD.properties");
+		config.loadConfig("props/log4j.properties");
+		log.info("\n\n");
+		log.info("Starting program!");
 		H2 db = null;
 		try {
-			System.out.println(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
+			log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
 		} catch (ConfigException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("Failed to read config file!", e1);
 		}
 		try {
 			try {
                 db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
             } catch (ConfigException e) {
-                // TODO log out (fatal)
-                e.printStackTrace();
+                log.fatal("Failed to read config file!", e);
             }
 			
 		SysInfo sys = new SysInfo();
 	//	DedupeSQL sql = new DedupeSQL();
-		// TODO fix CheckDedupes class
 		CheckDupes check = new CheckDupes();
 		
 		// this needs to be fixed so that the user passes
@@ -89,41 +93,30 @@ public class DedupeR {
 		try {
 			db.openConnection();
 		} catch (ClassNotFoundException | SQLException e) {
-			// TODO change to log out (fatal)
-			e.printStackTrace();
+			log.fatal("Failed to open database connection! Check config file!", e);
 		}
 		
 		Schema s = new Schema();
 		String sqlSchema = s.getSchema();
 		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
 		try {
-			System.out.println("Running schema update on db: " + db.getDbPath());
+			log.info("Running schema update on db: " + db.getDbPath());
 			psSchema.execute();
-			System.out.println("Schema update complete!");
+			log.info("Schema update complete!");
 		} catch (Exception e) {
 		    e.printStackTrace();
 		}
         try {
             db.closeConnection();
         } catch (SQLException e) {
-            // TODO change to log out (warning)
-            e.printStackTrace();
+            log.warn("Failed to close database connection!", e);
         }
         
 		setup();
-		// TODO fix checkDedupes()
 		check.checkDupes();
-/*		try {
-			db.closeConnection();
-		} catch (SQLException e) {
-			// TODO change to log out (warning)
-			e.printStackTrace();
-		}
-*/		
 		// stop timer
 		timer.stopTimer();
-		// TODO change to log out (info)
-		System.out.println("Total Runtime: " + timer.getTime());
+		log.info("Total Runtime: " + timer.getTime());
 		} catch (Exception e) {
 		    e.printStackTrace();
 		}
@@ -154,8 +147,7 @@ public class DedupeR {
                 rootDirs.add(new File(rootDirListArr.get(i)));
             }
         } catch (ConfigException e) {
-            // TODO log out (fatal)
-            e.printStackTrace();
+            log.fatal("Failed to read config file!", e);
         }
         for (int i=0; i < rootDirs.size(); i++){
 		    walk(rootDirs.get(i));
@@ -184,7 +176,7 @@ public class DedupeR {
 				    String hash = "";
 				    try {
 				        file = curFile.getPath();
-				        System.out.print("File: " + file);
+				        log.debug("File: " + file);
                         hash = hasher.getHash(curFile.getPath(), "SHA-512", BUFFER);
                         /* Hash Algo sizes are as follows:
                          * MD2     - 128 bits - 32 bytes  - 32 characters
@@ -195,18 +187,16 @@ public class DedupeR {
                          * SHA-512 - 512 bits - 128 bytes - 128 characters
                          */
                     } catch (IOException | HasherException e1) {
-                        // TODO log out (error)
-                        e1.printStackTrace();
+                        log.error("Failed to access and/or hash file!", e1);
                     }
 				    
 				    sql.writeRecord(file, hash);
 				    
-					System.out.println("\n\t Hash: " + hash);
+					log.debug("\n\t Hash: " + hash);
 				}	
 			} catch (Exception e) {
-				// TODO change to log out (warning)
-				e.printStackTrace();
-				System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + 
+				log.warn("Failed to access file!", e);
+				log.debug("i: " + i + "  |  path: " + contents[i].getPath() + 
 						"  |  pathcalled: " + path.getPath());
 			}
 		}
