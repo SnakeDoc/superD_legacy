@@ -2,6 +2,7 @@
 <project basedir="." default="build" name="superD">
     <property environment="env"/>
 	<property name="DEPLOY_DIR" value="/var/www/net.snakedoc/projects/superd/deploy"/>
+	<property name="DRY_DEPLOY_DIR" value="/var/www/net.snakedoc/projects/superd/dry_deploy"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
@@ -77,6 +78,10 @@
     </target>
 	<target depends="clean,build" name="deploy">
 		<move file="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip" todir="${DEPLOY_DIR}"/>
+		<echo>Nightly build deployed successfully!</echo>
+	</target>
+	<target depends="clean,build" name="dry_deploy">
+		<move file="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip" todir="${DRY_DEPLOY_DIR}"/>
 		<echo>Nightly build deployed successfully!</echo>
 	</target>
 	<target depends="jar, javadoc" name="pkg-distro" description="Build the distributable ZIP for superD">
