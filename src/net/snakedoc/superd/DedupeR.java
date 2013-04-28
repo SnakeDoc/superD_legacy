@@ -159,7 +159,13 @@ public class DedupeR {
             e.printStackTrace();
         }
     }
-	
+
+    /* Process command line arguments and store into properties file */
+
+    public void processCMDLineArgs(String[] args){
+        //TODO write CMD line argument parser
+    }
+
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
 	public static void walk(File path){
 		
