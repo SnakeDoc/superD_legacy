@@ -144,12 +144,20 @@ public class DedupeR {
 		
 		// TODO change to user specified root directory
 		try {
-            rootDirs[0] = new File(config.getConfig("ROOT"));
+            String rootDirList = new String(config.getConfig("ROOT"));
+            String rootDirListArr[] = rootDirList.split("||");
+            System.out.println(rootDirList);
+            System.out.println(rootDirListArr.length);
+            for (int i=0; i < rootDirListArr.length; i++){
+                rootDirs[i] = new File(rootDirListArr[i]);
+            }
         } catch (ConfigException e) {
             // TODO log out (fatal)
             e.printStackTrace();
         }
-		walk(rootDirs[0]);
+        for (int i=0; i < rootDirs.length; i++){
+		    walk(rootDirs[i]);
+        }
 	}
 	
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
