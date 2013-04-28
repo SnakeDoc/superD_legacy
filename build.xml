@@ -96,6 +96,7 @@
 	        </zipfileset>
 	        <zipfileset dir="${dest_dir}/${tmp_dir}/lib" prefix="lib">
 	            <patternset id="superd.dist.libs">
+	            	<exclude name =".keepme"/>
 	                <include name ="**/*"/>
 	            </patternset>
 	        </zipfileset>
