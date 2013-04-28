@@ -162,8 +162,8 @@ public class DedupeR {
 
     /* Process command line arguments and store into properties file */
 
-    public void processCMDLineArgs(String[] args){
-        //TODO write CMD line argument parser
+    public void readSetup(){
+        //TODO read in configuration from user
     }
 
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
