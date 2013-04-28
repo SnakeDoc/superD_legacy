@@ -1,5 +1,4 @@
 bin/
-db/
 src/testing
 .classpath
 .project
@@ -7,4 +6,7 @@ src/testing
 .git
 *.swp
 *~*
-
+*.trace.db
+*.trace.db.*
+*.lock.db
+*.h2.db
