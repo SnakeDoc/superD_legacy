@@ -186,9 +186,10 @@ public class CheckDupes {
 		    //TODO log out (warning)
 			e.printStackTrace();
 		}
+		System.out.println("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		System.out.print("Number of Duplicates Found: " + duplicateCounter);
 		System.out.print(" out of " + hash_count + " files");
-		System.out.printf("\nThat's means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100));
+		System.out.printf("\nThat means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100));
 		try {
             db.closeConnection();
         } catch (SQLException e) {
