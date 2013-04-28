@@ -39,89 +39,89 @@ public class DedupeR {
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
     
-	/* THIS IS DEBUG MAIN()
-	 * This should not be left in for deployment, only for development
-	 * Logic in main() should be moved to it's own driver method so it can be invoked
-	 * via scripts.
-	 */
+	/* DEGIN DEBUG MAIN() */
 	public static void main (String[] args) {
-		
-		// get instance of MilliTimer()
-		MilliTimer timer = new MilliTimer();
-		
-		// start timer
-		timer.startTimer();
-		
-		// get instance of other helper objects
-		Config config = new Config("props/superD.properties");
-		config.loadConfig("props/log4j.properties");
-		log.info("\n\n");
-		log.info("Starting program!");
-		H2 db = null;
-		try {
-			log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
-		} catch (ConfigException e1) {
-			log.error("Failed to read config file!", e1);
-		}
-		try {
-			try {
+		DedupeR d = new DedupeR();
+		d.driver();
+	}
+	/* END DEBUG MAIN() */
+	
+	public void driver() {
+	    // get instance of MilliTimer()
+        MilliTimer timer = new MilliTimer();
+        
+        // start timer
+        timer.startTimer();
+        
+        // get instance of other helper objects
+        Config config = new Config("props/superD.properties");
+        config.loadConfig("props/log4j.properties");
+        log.info("\n\n");
+        log.info("Starting program!");
+        H2 db = null;
+        try {
+            log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
+        } catch (ConfigException e1) {
+            log.error("Failed to read config file!", e1);
+        }
+        try {
+            try {
                 db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
             } catch (ConfigException e) {
                 log.fatal("Failed to read config file!", e);
             }
-			
-		SysInfo sys = new SysInfo();
-	//	DedupeSQL sql = new DedupeSQL();
-		CheckDupes check = new CheckDupes();
-		
-		// this needs to be fixed so that the user passes
-		// in the argument for hashVer...
-		//
-		// also, a better name for hashVer is probably hashAlgo
-		// since it's not a version, its an algorithm we are selecting
-		//
-		// options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
-		// there is a method in Hasher (from jutils) that will validate
-		// the user input to ensure it's a supported hash algorithm.
-		String hashVer = "SHA-";
-		if (sys.getCPUArch().contains("64")) {
-			hashVer += "512";
-		} else {
-			hashVer += "256";
-		}
-		
-		try {
-			db.openConnection();
-		} catch (ClassNotFoundException | SQLException e) {
-			log.fatal("Failed to open database connection! Check config file!", e);
-		}
-		
-		Schema s = new Schema();
-		String sqlSchema = s.getSchema();
-		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
-		try {
-			log.info("Running schema update on db: " + db.getDbPath());
-			psSchema.execute();
-			log.info("Schema update complete!");
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
+            
+        SysInfo sys = new SysInfo();
+    //  DedupeSQL sql = new DedupeSQL();
+        CheckDupes check = new CheckDupes();
+        
+        // this needs to be fixed so that the user passes
+        // in the argument for hashVer...
+        //
+        // also, a better name for hashVer is probably hashAlgo
+        // since it's not a version, its an algorithm we are selecting
+        //
+        // options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
+        // there is a method in Hasher (from jutils) that will validate
+        // the user input to ensure it's a supported hash algorithm.
+        String hashVer = "SHA-";
+        if (sys.getCPUArch().contains("64")) {
+            hashVer += "512";
+        } else {
+            hashVer += "256";
+        }
+        
+        try {
+            db.openConnection();
+        } catch (ClassNotFoundException | SQLException e) {
+            log.fatal("Failed to open database connection! Check config file!", e);
+        }
+        
+        Schema s = new Schema();
+        String sqlSchema = s.getSchema();
+        PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+        try {
+            log.info("Running schema update on db: " + db.getDbPath());
+            psSchema.execute();
+            log.info("Schema update complete!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         try {
             db.closeConnection();
         } catch (SQLException e) {
             log.warn("Failed to close database connection!", e);
         }
         
-		setup();
-		check.checkDupes();
-		// stop timer
-		timer.stopTimer();
-		log.info("Total Runtime: " + timer.getTime());
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
+        setup();
+        check.checkDupes();
+        // stop timer
+        timer.stopTimer();
+        log.info("Total Runtime: " + timer.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 	}
-	/* END DEBUG MAIN() */
 	
 	
 	public static void setup() {
@@ -129,14 +129,11 @@ public class DedupeR {
 	    // load program propterties
 	    Config config = new Config("props/superD.properties");
 	    
-		/* TODO should not be limited to 1 directory to scan
-		 * should allow deduping multiple root directories.
-		 * this would be useful for deduping data sets that are
-		 * on two or more drives.
+		/** Allow multiple root directories to scan
 		 */
 		ArrayList<File> rootDirs = new ArrayList(1);
 		
-		// TODO change to user specified root directory
+		// TODO change to user specified root directory via cmd line input
 		try {
             String dil = new String(config.getConfig("ROOT_DIL"));
             String rootDirList = new String(config.getConfig("ROOT"));
