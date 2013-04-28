@@ -11,7 +11,11 @@
     <property name="proj_name" value="superD"/>
 	<property name="version_major" value="0"/>
 	<property name="version_minor" value="1"/>
-	<property name="version_sub" value="${env.BUILD_NUMBER}"/>
+	<target name="build_num"> 
+	  <property environment="env" /> 
+	  <echo message="${env.BUILD_NUMBER}"/> 
+	</target>
+	<property name="version_sub" value="${build_num}"/>
     <tstamp>
     	<format property="build.datestamp" pattern="yyyy-MM-dd" locale="en,US"/>
     </tstamp>
