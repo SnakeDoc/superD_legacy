@@ -10,3 +10,6 @@ src/testing
 *.trace.db.*
 *.lock.db
 *.h2.db
+.idea
+out/
+superD.iml
