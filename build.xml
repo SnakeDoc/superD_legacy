@@ -63,7 +63,6 @@
             <attribute name="Manifest-Version" value="1.0"/>
             <attribute name="Project-Website" value="www.snakedoc.net"/>
             <attribute name="Project" value="${proj_name}-${version_major}.${version_minor}.${version_sub}"/>
-        	<attribute name="Authors" value="Jason Sipula, Trace Hagan"/>
         </manifest>
     </target>
     <target depends="create_manifest" name="jar">
