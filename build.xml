@@ -6,16 +6,13 @@
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
 	<property environment="env"/>
+	<property name="label" value="${env.JOB_NAME}-${env.BUILD_NUMBER}"/>
     <property name="dest_dir" value="target"/>
     <property name="tmp_dir" value="tmp"/>
     <property name="proj_name" value="superD"/>
 	<property name="version_major" value="0"/>
 	<property name="version_minor" value="1"/>
-	<target name="build_num"> 
-	  <property environment="env" /> 
-	  <echo message="${env.BUILD_NUMBER}"/> 
-	</target>
-	<property name="version_sub" value="${build_num}"/>
+	<property name="version_sub" value="${label}"/>
     <tstamp>
     	<format property="build.datestamp" pattern="yyyy-MM-dd" locale="en,US"/>
     </tstamp>
