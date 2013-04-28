@@ -17,7 +17,7 @@
     </tstamp>
     <path id="superd.classpath">
         <pathelement location="bin"/>
-        <pathelement location="lib"/>
+        <pathelement location="lib/**"/>
     </path>
     <target name="init">
         <mkdir dir="${dest_dir}"/>
