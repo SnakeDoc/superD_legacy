@@ -84,13 +84,18 @@ public class DedupeR {
         // options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
         // there is a method in Hasher (from jutils) that will validate
         // the user input to ensure it's a supported hash algorithm.
+
+
+        /*NOT IN USE AS IT READS FROM PROPERTY FILE
         String hashVer = "SHA-";
+
         if (sys.getCPUArch().contains("64")) {
             hashVer += "512";
         } else {
             hashVer += "256";
         }
-        
+        */
+
         try {
             db.openConnection();
         } catch (ClassNotFoundException | SQLException e) {
@@ -112,7 +117,25 @@ public class DedupeR {
         } catch (SQLException e) {
             log.warn("Failed to close database connection!", e);
         }
-        
+
+        //INSTEAD OF COMMAND LINE ARGUMENTS,
+        // PROMPT FOR VARIOUS SETTINGS IF
+        // USER WANTS TO DO THIS INSTEAD OF
+        // PROP FILE
+
+        /*Scanner in = new Scanner(System.in);
+        System.out.println("Would you like to read from prop file or enter options now?");
+        System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
+            int choice=2;
+        try{
+            choice = in.nextInt();
+        } catch(Exception e){
+            System.out.println("Invalid input! Proceeding using property file");
+        }
+        if (choice == 1){
+            readSetup();
+        }*/
+
         setup();
         check.checkDupes();
         // stop timer
@@ -161,9 +184,34 @@ public class DedupeR {
     }
 
     /* Process command line arguments and store into properties file */
+    /* CONFIG class needs to be fixed. config.setConfig overwrites entire file rather than just the specific key */
 
     public void readSetup(){
         //TODO read in configuration from user
+        Config config = new Config("props/superD.properties");
+        Scanner in = new Scanner(System.in);
+
+        //prompt for algorithm
+        System.out.println("Which hashing algorithm would you like to use?");
+        System.out.println("We recommend SHA-256 for 32-bit machines and SHA-512 for 64-bit machines");
+        System.out.print("Enter your choice: ");
+        String input;
+        input = in.nextLine();
+        config.setConfig("HASH_ALGO", input);
+
+        //prompt for ROOT_DIL
+        System.out.println("Please enter a delimiter for root paths");
+        System.out.println("Try to use something that won't appear in the path");
+        System.out.println("We recommend ;;");
+        System.out.print("Enter choice: ");
+        input = in.nextLine();
+        config.setConfig("ROOT_DIL", input);
+
+        //PROMPT FOR DIRECTORIES
+        System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
+        System.out.print("Please enter: ");
+        input = in.nextLine();
+        config.setConfig("ROOT", input);
     }
 
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
