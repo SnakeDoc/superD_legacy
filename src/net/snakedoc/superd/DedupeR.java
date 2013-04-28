@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.*;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
@@ -140,23 +141,24 @@ public class DedupeR {
 		 * this would be useful for deduping data sets that are
 		 * on two or more drives.
 		 */
-		File[] rootDirs = new File[1];
+		ArrayList<File> rootDirs = new ArrayList(1);
 		
 		// TODO change to user specified root directory
 		try {
+            String dil = new String(config.getConfig("ROOT_DIL"));
             String rootDirList = new String(config.getConfig("ROOT"));
-            String rootDirListArr[] = rootDirList.split("||");
+            List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
             System.out.println(rootDirList);
-            System.out.println(rootDirListArr.length);
-            for (int i=0; i < rootDirListArr.length; i++){
-                rootDirs[i] = new File(rootDirListArr[i]);
+            System.out.println(rootDirListArr.size());
+            for (int i=0; i < rootDirListArr.size(); i++){
+                rootDirs.add(new File(rootDirListArr.get(i)));
             }
         } catch (ConfigException e) {
             // TODO log out (fatal)
             e.printStackTrace();
         }
-        for (int i=0; i < rootDirs.length; i++){
-		    walk(rootDirs[i]);
+        for (int i=0; i < rootDirs.size(); i++){
+		    walk(rootDirs.get(i));
         }
 	}
 	
