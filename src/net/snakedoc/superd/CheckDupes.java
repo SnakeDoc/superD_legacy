@@ -143,7 +143,6 @@ public class CheckDupes {
 				rsCompare = psCompare.executeQuery();
 				    
 				while(rsCompare != null && rsCompare.next()) {
-				    //TODO write all duplicates to new table in DATABASE for later possible deletion
 				    
 				    psGetRecordId.setString(1, deDupeObj[i].filepath);
 				    rsGetRecordId = psGetRecordId.executeQuery();
