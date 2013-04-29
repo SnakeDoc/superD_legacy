@@ -19,12 +19,12 @@
 		<RequiredReason>Dependency for net.snakedoc.jutils.testsuite.* classes</RequiredReason>
 	</Library>
 	<Library>
-		<FileName>JUtils-2013-04-27.jar</FileName>
-		<Version>0.1.44</Version>
-		<ReleaseDate>2013-04-27</ReleaseDate>
+		<FileName>JUtils.jar</FileName>
+		<Version>0.2.46</Version>
+		<ReleaseDate>2013-04-28</ReleaseDate>
 		<URL>http://www.snakedoc.net/</URL>
 		<Description>JUtils library (Nightlies)</Description>
 		<Required>True</Required>
-		<RequiredReason>Dependency for database connection.</RequiredReason>
+		<RequiredReason>Dependency for database connection, Property File configuration.</RequiredReason>
 	</Library>
 </Libraries>
