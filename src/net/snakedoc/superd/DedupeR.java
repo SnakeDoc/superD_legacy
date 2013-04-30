@@ -149,14 +149,14 @@ public class DedupeR {
 	
 	public static void setup() {
 		
-	    // load program propterties
+	    // load program properties
 	    Config config = new Config("props/superD.properties");
 	    
 		/** Allow multiple root directories to scan
 		 */
-		ArrayList<File> rootDirs = new ArrayList(1);
+		ArrayList<File> rootDirs = new ArrayList<File>(1);
 		
-		// TODO change to user specified root directory via cmd line input
+		// TODO possible add feature to have cmd line input at runtime to override ROOT dir
 		try {
             String dil = new String(config.getConfig("ROOT_DIL"));
             String rootDirList = new String(config.getConfig("ROOT"));
@@ -177,11 +177,13 @@ public class DedupeR {
                     log.debug(rootDirs.get(i).toString() + "  Appears to not be a directory; skipping to next in list");
                 }
             }
+        //TODO replace generic Exception with specific exception(s)
         //lets make sure we didn't accidentally put in an invalid path
 	    }catch(Exception e){
             e.printStackTrace();
         }
     }
+
 
     /* Process command line arguments and store into properties file */
     /* CONFIG class needs to be fixed. config.setConfig overwrites entire file rather than just the specific key */
@@ -215,6 +217,8 @@ public class DedupeR {
     }
 
 	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
+	// Possible TODO move walk() to ScanFiles if possible if we want to?
+
 	public static void walk(File path){
 		
 	    Hasher hasher = new Hasher();

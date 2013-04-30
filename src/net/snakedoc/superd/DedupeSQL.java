@@ -46,7 +46,7 @@ public class DedupeSQL {
         } catch (ClassNotFoundException | SQLException e1) {
             log.fatal("Failed to open database connection!", e1);
         }
-		String sqlInsert = "INSERT INTO files (file_path, file_hash) VALUES (? , ?)";
+		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ?, ?)";
 		PreparedStatement psInsert = null;
 		try {
 			psInsert = db.getConnection().prepareStatement(sqlInsert);
@@ -57,6 +57,7 @@ public class DedupeSQL {
 		try {
 			psInsert.setString(1, file);
 			psInsert.setString(2, hash);
+			psInsert.setLong(3, (new File(file).length()));
 			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
 			psInsert.executeUpdate();	
 		} catch (SQLException e) {
