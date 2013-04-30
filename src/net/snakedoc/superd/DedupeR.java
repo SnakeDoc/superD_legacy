@@ -39,15 +39,15 @@ public class DedupeR {
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
     
-	/* DEGIN DEBUG MAIN() */
+
 	public static void main (String[] args) {
 		DedupeR d = new DedupeR();
 		d.driver();
 	}
-	/* END DEBUG MAIN() */
+
 	
 	public void driver() {
-	    // get instance of MilliTimer()
+	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
         
         // start timer
@@ -58,6 +58,8 @@ public class DedupeR {
         config.loadConfig("props/log4j.properties");
         log.info("\n\n");
         log.info("Starting program!");
+
+        //CREATE DATABASE
         H2 db = null;
         try {
             log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
@@ -71,37 +73,18 @@ public class DedupeR {
                 log.fatal("Failed to read config file!", e);
             }
             
-        SysInfo sys = new SysInfo();
-    //  DedupeSQL sql = new DedupeSQL();
+
+        //Create CHECKDUPES OBJ
         CheckDupes check = new CheckDupes();
-        
-        // this needs to be fixed so that the user passes
-        // in the argument for hashVer...
-        //
-        // also, a better name for hashVer is probably hashAlgo
-        // since it's not a version, its an algorithm we are selecting
-        //
-        // options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
-        // there is a method in Hasher (from jutils) that will validate
-        // the user input to ensure it's a supported hash algorithm.
 
-
-        /*NOT IN USE AS IT READS FROM PROPERTY FILE
-        String hashVer = "SHA-";
-
-        if (sys.getCPUArch().contains("64")) {
-            hashVer += "512";
-        } else {
-            hashVer += "256";
-        }
-        */
-
+        //CONNECT TO DATABASE
         try {
             db.openConnection();
         } catch (ClassNotFoundException | SQLException e) {
             log.fatal("Failed to open database connection! Check config file!", e);
         }
-        
+
+        //LOAD DATABASE TABLES
         Schema s = new Schema();
         String sqlSchema = s.getSchema();
         PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
@@ -136,9 +119,14 @@ public class DedupeR {
             readSetup();
         }
 
+        //END PROMPT FOR COMMAND LINE ARGUMENTS
+
+        //Run Setup() to do main logic, make calls to Walk()
         setup();
+
+        //DATABASE now filled with all file hashes; time to look for duplicates
         check.checkDupes();
-        // stop timer
+        // ALL DONE! stop timer
         timer.stopTimer();
         log.info("Total Runtime: " + timer.getTime());
         } catch (Exception e) {
@@ -153,11 +141,10 @@ public class DedupeR {
 	    // load program properties
 	    Config config = new Config("props/superD.properties");
 	    
-		/** Allow multiple root directories to scan
-		 */
+        //list of directories to scan
 		ArrayList<File> rootDirs = new ArrayList<File>(1);
 		
-		// TODO possible add feature to have cmd line input at runtime to override ROOT dir
+        //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
             String dil = new String(config.getConfig("ROOT_DIL"));
             String rootDirList = new String(config.getConfig("ROOT"));
@@ -169,6 +156,7 @@ public class DedupeR {
         } catch (ConfigException e) {
             log.fatal("Failed to read config file!", e);
         }
+        //Call Walker.walk() on all the directories in rootDirs
         try{
             for (int i=0; i < rootDirs.size(); i++){
                 //make sure that it is a directory
@@ -179,7 +167,6 @@ public class DedupeR {
                 }
             }
         //TODO replace generic Exception with specific exception(s)
-        //lets make sure we didn't accidentally put in an invalid path
 	    }catch(Exception e){
             e.printStackTrace();
         }
@@ -187,10 +174,11 @@ public class DedupeR {
 
 
     /* Process command line arguments and store into properties file */
-    /* CONFIG class needs to be fixed. config.setConfig overwrites entire file rather than just the specific key */
+    /* CONFIG class needs to be fixed.        */
+    /*  TODO config.setConfig overwrites entire file rather than just the specific key */
 
     public void readSetup(){
-        //TODO read in configuration from user
+
         Config config = new Config("props/superD.properties");
         Scanner in = new Scanner(System.in);
 
@@ -216,9 +204,5 @@ public class DedupeR {
         input = in.nextLine();
         config.setConfig("ROOT", input);
     }
-
-
-	// NOTE, moved Walker to it's own class Walker. now call Walker.walk()
-
 
 }
