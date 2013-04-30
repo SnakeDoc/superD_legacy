@@ -123,7 +123,7 @@ public class DedupeR {
         // USER WANTS TO DO THIS INSTEAD OF
         // PROP FILE
 
-        /*Scanner in = new Scanner(System.in);
+        Scanner in = new Scanner(System.in);
         System.out.println("Would you like to read from prop file or enter options now?");
         System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
             int choice=2;
@@ -134,7 +134,7 @@ public class DedupeR {
         }
         if (choice == 1){
             readSetup();
-        }*/
+        }
 
         setup();
         check.checkDupes();
@@ -148,7 +148,8 @@ public class DedupeR {
 	
 	
 	public static void setup() {
-		
+		//CREATE WALKER OBJECT
+        Walker walker = new Walker(BUFFER);
 	    // load program properties
 	    Config config = new Config("props/superD.properties");
 	    
@@ -172,7 +173,7 @@ public class DedupeR {
             for (int i=0; i < rootDirs.size(); i++){
                 //make sure that it is a directory
                 if (rootDirs.get(i).isDirectory()){
-                    walk(rootDirs.get(i));
+                    walker.walk(rootDirs.get(i));
                 } else {
                     log.debug(rootDirs.get(i).toString() + "  Appears to not be a directory; skipping to next in list");
                 }
@@ -216,45 +217,8 @@ public class DedupeR {
         config.setConfig("ROOT", input);
     }
 
-	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
-	// Possible TODO move walk() to ScanFiles if possible if we want to?
 
-	public static void walk(File path){
-		
-	    Hasher hasher = new Hasher();
-	    DedupeSQL sql = new DedupeSQL();
-        Config config = new Config("props/superD.properties");
-		int i=0;
+	// NOTE, moved Walker to it's own class Walker. now call Walker.walk()
 
-		File[] contents = path.listFiles();
-		
-		for (File curFile : contents){
-			try{
-				if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
-					walk(curFile);
-				} else if (!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
 
-                    //reads in HASH_ALGO from Prop File to decide which algorithm to use
-                    String hashAlgo = new String(config.getConfig("HASH_ALGO"));
-				    String file = "";
-				    String hash = "";
-				    try {
-				        file = curFile.getPath();
-				        log.debug("File: " + file);
-                        hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
-                    } catch (IOException | HasherException e1) {
-                        log.error("Failed to access and/or hash file!", e1);
-                    }
-				    
-				    sql.writeRecord(file, hash);
-				    
-					log.debug("\n\t Hash: " + hash);
-				}	
-			} catch (Exception e) {
-				log.warn("Failed to access file!", e);
-				log.debug("i: " + i + "  |  path: " + contents[i].getPath() + 
-						"  |  pathcalled: " + path.getPath());
-			}
-		}
-	}
 }
