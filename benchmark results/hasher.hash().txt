@@ -1,0 +1,22 @@
+ INFO [main] (DedupeR.java:122) - Buffer Size: 1024
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 8.909763 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 2048
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 8.449057 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 4096
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.396208 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 8192
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.4207296 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 16384
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.924021 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 32768
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.866201 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 65536
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.209529 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 131072
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.4445233 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 262144
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 7.766861 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 524288
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 8.561949 (m)
+ INFO [main] (DedupeR.java:122) - Buffer Size: 1048576
+ INFO [main] (DedupeR.java:123) - Total Runtime for 50 iterations: 8.217021 (m)

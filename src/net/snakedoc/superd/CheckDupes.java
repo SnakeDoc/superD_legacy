@@ -187,7 +187,7 @@ public class CheckDupes {
 		} catch (SQLException e) {
 		    log.error("Failed to get statistics!", e);
 		}
-		log.info("\n\n\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		/*log.info("\n\n\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		log.info("Number of Duplicates Found: " + duplicateCounter);
 		log.info(" out of " + hash_count + " files");
 		log.info(String.format("\nThat means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100)));
@@ -198,7 +198,7 @@ public class CheckDupes {
 		} else {
 		    log.info(String.format("This accounts for about %.2f MB of wasted storage!", 
 		                    ((double)bytes / (double)1048576))); // divide by number of bytes in 1 MB
-		}
+		} */
 		
 		try {
             db.closeConnection();

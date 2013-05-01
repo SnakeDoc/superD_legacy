@@ -58,7 +58,7 @@ public class DedupeSQL {
 			psInsert.setString(1, file);
 			psInsert.setString(2, hash);
 			psInsert.setLong(3, (new File(file).length()));
-			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
+			/////////////////////////////////////////////////log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
 			psInsert.executeUpdate();	
 		} catch (SQLException e) {
 			log.error("Failed to query database!", e);
