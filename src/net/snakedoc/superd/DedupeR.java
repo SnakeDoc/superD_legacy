@@ -17,7 +17,6 @@
 package net.snakedoc.superd;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
@@ -28,9 +27,6 @@ import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
-import net.snakedoc.jutils.io.Hasher;
-import net.snakedoc.jutils.io.HasherException;
-import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
