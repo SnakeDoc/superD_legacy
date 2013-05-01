@@ -48,10 +48,10 @@ public class DedupeR {
         // get instance of MilliTimer() for benchmarking
         int i=0;
 
-        while (BUFFER <= 16384*64){
+        while (BUFFER <= 1048576 * 16){
         MilliTimer timer1 = new MilliTimer();
         timer1.startTimer();
-        while (i<50){
+        while (i<100){
         MilliTimer timer = new MilliTimer();
 
         // start timer
@@ -120,7 +120,7 @@ public class DedupeR {
         }
         timer1.stopTimer();
         log.info("Buffer Size: " + BUFFER);
-        log.info("Total Runtime for 50 iterations: " + timer1.getTime());
+        log.info("Total Runtime for 100 iterations: " + timer1.getTime());
             BUFFER=BUFFER*2;
             i=0;
         }

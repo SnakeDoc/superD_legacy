@@ -77,7 +77,7 @@ public class Walker {
         try {
             file = curFile.getPath();
             ////////////////////////////////////////////////////////////log.debug("File: " + file);
-            hash = hasher.getHashNIO(curFile.getPath(), hashAlgo, BUFFER);
+            hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
         } catch (IOException | HasherException e1) {
             log.error("Failed to access and/or hash file!", e1);
         }
