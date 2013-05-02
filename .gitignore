@@ -13,5 +13,8 @@ src/testing
 *.h2.db
 *.log*
 out/
+<<<<<<< HEAD
 superD.iml
 .idea
+=======
+>>>>>>> f09c33f4b26ebdaa440852d442e98c600017dd3a

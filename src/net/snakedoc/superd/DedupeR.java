@@ -30,7 +30,7 @@ import net.snakedoc.jutils.database.H2;
 
 public class DedupeR {
 
-    private final static int BUFFER = 16384; // Buffer size in Bytes to use in hashing algorithm.
+    private static int BUFFER = 1024; //////////////    16384; // Buffer size in Bytes to use in hashing algorithm.
                                              // Has the potential to directly impact performance.
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
@@ -38,9 +38,92 @@ public class DedupeR {
 
 	public static void main (String[] args) {
 		DedupeR d = new DedupeR();
-		d.driver();
+		d.benchmarkDriver();
 	}
 
+    //BENCHMARKING DRIVER TO TEST EFFECT OF BUFFER SIZE
+
+    public void benchmarkDriver() {
+        // get instance of MilliTimer() for benchmarking
+        int i=0;
+
+        while (BUFFER <= 1048576 * 16){
+        MilliTimer timer1 = new MilliTimer();
+        timer1.startTimer();
+        while (i<100){
+        MilliTimer timer = new MilliTimer();
+
+        // start timer
+        timer.startTimer();
+
+        // get instance of other helper objects
+        Config config = new Config("props/superD.properties");
+        config.loadConfig("props/log4j.properties");
+        //log.info("\n\n");
+        //log.info("Starting program!");
+
+        //CREATE DATABASE
+        H2 db = null;
+        /*try {
+            //log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
+        } catch (ConfigException e1) {
+            log.error("Failed to read config file!", e1);
+        } */
+        try {
+            try {
+                db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+            } catch (ConfigException e) {
+                log.fatal("Failed to read config file!", e);
+            }
+
+
+            //Create CHECKDUPES OBJ
+            CheckDupes check = new CheckDupes();
+
+            //CONNECT TO DATABASE
+            try {
+                db.openConnection();
+            } catch (ClassNotFoundException | SQLException e) {
+                log.fatal("Failed to open database connection! Check config file!", e);
+            }
+
+            //LOAD DATABASE TABLES
+            Schema s = new Schema();
+            String sqlSchema = s.getSchema();
+            PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+            try {
+                //log.info("Running schema update on db: " + db.getDbPath());
+                psSchema.execute();
+                //log.info("Schema update complete!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                db.closeConnection();
+            } catch (SQLException e) {
+                log.warn("Failed to close database connection!", e);
+            }
+
+            //Run Setup() to do main logic, make calls to Walk()
+            setup();
+
+            //DATABASE now filled with all file hashes; time to look for duplicates
+            check.checkDupes();
+            // ALL DONE! stop timer
+            timer.stopTimer();
+            //log.info("Total Runtime: " + timer.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+            i++;
+        }
+        timer1.stopTimer();
+        log.info("Buffer Size: " + BUFFER);
+        log.info("Total Runtime for 100 iterations: " + timer1.getTime());
+            BUFFER=BUFFER*2;
+            i=0;
+        }
+    }
 	
 	public void driver() {
 	    // get instance of MilliTimer() for benchmarking
@@ -200,5 +283,4 @@ public class DedupeR {
         input = in.nextLine();
         config.setConfig("ROOT", input);
     }
-
 }

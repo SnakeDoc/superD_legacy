@@ -76,13 +76,13 @@ public class Walker {
         String hash = "";
         try {
             file = curFile.getPath();
-            log.debug("File: " + file);
+            ////////////////////////////////////////////////////////////log.debug("File: " + file);
             hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
         } catch (IOException | HasherException e1) {
             log.error("Failed to access and/or hash file!", e1);
         }
         sql.writeRecord(file, hash);
-        log.debug("\n\t Hash: " + hash);
+        /////////////////////////////////////////////////////////////////log.debug("\n\t Hash: " + hash);
         }catch( Exception e){
             log.warn(e.getStackTrace());
         }
