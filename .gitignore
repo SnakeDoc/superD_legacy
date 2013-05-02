@@ -11,7 +11,7 @@ src/testing
 *.trace.db.*
 *.lock.db
 *.h2.db
-.idea
+*.log*
 out/
 superD.iml
-*.log*
+.idea
