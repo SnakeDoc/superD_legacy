@@ -27,12 +27,12 @@ import java.io.IOException;
 public class Walker {
     private static int BUFFER;
     private static final Logger log = Logger.getLogger(DedupeR.class);
-    private static Hasher hasher = new Hasher();
-    private static DedupeSQL sql = new DedupeSQL();
-    private static Config config = new Config("props/superD.properties");
+    private static final Hasher hasher = new Hasher();
+    private static final DedupeSQL sql = new DedupeSQL();
+    private static final Config config = new Config("props/superD.properties");
 
     public Walker(int buffer){
-        this.BUFFER = buffer;
+        BUFFER = buffer;
     }
 
     public static void walk(File path){
@@ -53,25 +53,17 @@ public class Walker {
         }
     }
 
-    public static boolean isValidDirectory(File curFile){
-        if (curFile.isDirectory() && curFile!=null && !curFile.isHidden()){
-            return true;
-        }else{
-            return false;
-        }
+    private static boolean isValidDirectory(File curFile){
+        return curFile.isDirectory() && curFile != null && !curFile.isHidden();
     }
 
-    public static boolean isValidFile(File curFile){
-        if (!curFile.isDirectory() && curFile!=null && !curFile.isHidden()){
-            return true;
-        }else{
-            return false;
-        }
+    private static boolean isValidFile(File curFile){
+        return !curFile.isDirectory() && curFile != null && !curFile.isHidden();
     }
 
-    public static void hashFile(File curFile){
+    private static void hashFile(File curFile){
         try{
-        String hashAlgo = new String(config.getConfig("HASH_ALGO"));
+        String hashAlgo = config.getConfig("HASH_ALGO");
         String file = "";
         String hash = "";
         try {
