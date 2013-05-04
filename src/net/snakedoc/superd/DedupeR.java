@@ -142,8 +142,8 @@ public class DedupeR {
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String dil = new String(config.getConfig("ROOT_DIL"));
-            String rootDirList = new String(config.getConfig("ROOT"));
+            String dil = config.getConfig("ROOT_DIL");
+            String rootDirList = config.getConfig("ROOT");
             List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
 
             for (int i=0; i < rootDirListArr.size(); i++){
