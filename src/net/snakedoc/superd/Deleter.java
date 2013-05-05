@@ -24,4 +24,12 @@ public class Deleter {
 
     }
 
+    public static void deleteFile(File[] files){
+        for (File file : files){
+            file.delete();
+        }
+    }
+
+
+
 }
