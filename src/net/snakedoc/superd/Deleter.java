@@ -17,6 +17,7 @@
 package net.snakedoc.superd;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 
 public class Deleter {
@@ -24,13 +25,15 @@ public class Deleter {
 
 //TODO build GUI using jlist to select files to delete. Need list of duplicates
     public static void buildGUI(File[] duplicates){
-        //TODO ADD DELETE BUTTON
+        JButton jb = new JButton("Delete Selected Files");
         JFrame frame = new JFrame("Select Files to Delete");
         JPanel panel = new JPanel();
         JList files = new JList(duplicates);
         files.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         panel.add(new JScrollPane(files));
+        panel.add(jb);
         panel.setVisible(true);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(panel);
         frame.setSize(300,800);
         frame.setVisible(true);
