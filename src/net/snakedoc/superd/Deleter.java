@@ -20,6 +20,11 @@ import java.io.File;
 
 public class Deleter {
 //TODO BUILD DELETER CLASS
+
+//TODO build GUI using jlist to select files to delete. Need list of duplicates
+    public static void buildGUI(File[] duplicates){
+
+    }
     public Deleter(){
 
     }
