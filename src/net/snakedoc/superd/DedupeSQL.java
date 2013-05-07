@@ -32,24 +32,24 @@ public class DedupeSQL {
 	
 	public void writeRecord(String file, String hash) {
 		
-	    Config cfg = new Config("props/superD.properties");
-	    cfg.loadConfig("props/log4j.properties");
+	    Config cfg = new Config("props/superD.properties"); // TODO fix like the db connection issue, 'this' keyword and instance vars
+	    cfg.loadConfig("props/log4j.properties");  // TODO fix same as above
 		H2 db = null;
 		try {
-            db = Database.getInstance();
+            db = Database.getInstance();  // TODO this is a possible problem. see todo tag on db.openConnection() below for explanation
         } catch (ConfigException e2) {
             log.fatal("Failed to read config file!", e2);
         }
 		
         try {
-            db.openConnection();
+            db.openConnection();  // TODO this is a problem. causes new connection every iteration, solve with instance variables and using 'this' keyword.
         } catch (ClassNotFoundException | SQLException e1) {
             log.fatal("Failed to open database connection!", e1);
         }
-		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ?, ?)";
+		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ? , ?)";
 		PreparedStatement psInsert = null;
 		try {
-			psInsert = db.getConnection().prepareStatement(sqlInsert);
+			psInsert = db.getConnection().prepareStatement(sqlInsert); // TODO fix like db connections
 		} catch (SQLException e) {
 			log.error("Failed to set databse query!", e);
 		}

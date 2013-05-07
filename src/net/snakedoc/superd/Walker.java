@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
+//TODO is it possible to make these non-static without breakage?
+//TODO so if we were to thread we would require separate instances of these methods i think.
 public class Walker {
     private static int BUFFER;
     private static final Logger log = Logger.getLogger(DedupeR.class);
