@@ -73,8 +73,7 @@ public class CheckDupes {
 		// setup database object
 		H2 db = null;
         try {
-            db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(),
-                            config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+            db = Database.getInstance();
         } catch (ConfigException e2) {
             log.error("Failed to read config file!", e2);
         }
