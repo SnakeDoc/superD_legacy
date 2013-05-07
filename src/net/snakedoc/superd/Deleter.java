@@ -24,16 +24,24 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 public class Deleter {
-//TODO BUILD DELETER CLASS
 
-//TODO build GUI using jlist to select files to delete. Need list of duplicates
-    public static void buildGUI(File[] duplicates){
+    public static void buildGUI(final File[] duplicates){
         JButton jb = new JButton("Delete Selected Files");
-        /* todo add action listener to button to delete files
-        jb.addActionListener();                              */
+        final JList files = new JList(duplicates);
+        jb.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                int[] listIndicies = files.getSelectedIndices();
+                File[] filesSelected = new File[listIndicies.length];
+                for (int i = 0; i < listIndicies.length-1; i++){
+                    filesSelected[i]= duplicates[listIndicies[i]];
+                }
+                System.out.println(filesSelected[0].toString()); /*TODO fix puking*/  //will puke if singular file is selected
+            }
+        });
         JFrame frame = new JFrame("Select Files to Delete");
         JPanel panel = new JPanel();
-        JList files = new JList(duplicates);
+
         files.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         panel.add(new JScrollPane(files));
         panel.add(jb);
@@ -46,11 +54,4 @@ public class Deleter {
     public Deleter(){
 
     }
-
-    public static void deleteFile(File[] files){
-        for (File file : files){
-            file.delete();
-        }
-    }
-
 }
