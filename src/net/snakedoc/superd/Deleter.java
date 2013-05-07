@@ -33,10 +33,12 @@ public class Deleter {
             public void actionPerformed(ActionEvent e){
                 int[] listIndicies = files.getSelectedIndices();
                 File[] filesSelected = new File[listIndicies.length];
-                for (int i = 0; i < listIndicies.length-1; i++){
+                for (int i = 0; i < listIndicies.length; i++){
                     filesSelected[i]= duplicates[listIndicies[i]];
                 }
-                System.out.println(filesSelected[0].toString()); /*TODO fix puking*/  //will puke if singular file is selected
+                for (int j = 0; j < filesSelected.length ; j++){
+                    System.out.println(filesSelected[j].toString());
+                }
             }
         });
         JFrame frame = new JFrame("Select Files to Delete");
