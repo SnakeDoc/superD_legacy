@@ -36,7 +36,7 @@ public class DedupeSQL {
 	    cfg.loadConfig("props/log4j.properties");
 		H2 db = null;
 		try {
-            db = new H2(new File(cfg.getConfig("H2_dbURL")).getAbsolutePath(), cfg.getConfig("H2_dbUser"), cfg.getConfig("H2_dbPass"));
+            db = Database.getInstance();
         } catch (ConfigException e2) {
             log.fatal("Failed to read config file!", e2);
         }

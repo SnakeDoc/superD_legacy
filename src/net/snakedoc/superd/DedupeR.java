@@ -60,18 +60,9 @@ public class DedupeR {
         log.info("Starting program!");
         H2 db = null;
         try {
-            log.debug(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
-        } catch (ConfigException e1) {
-            log.error("Failed to read config file!", e1);
-        }
-        try {
-            try {
-                db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
-            } catch (ConfigException e) {
-                log.fatal("Failed to read config file!", e);
-            }
-            
-        SysInfo sys = new SysInfo();
+            db = Database.getInstance();
+
+            SysInfo sys = new SysInfo();
     //  DedupeSQL sql = new DedupeSQL();
         CheckDupes check = new CheckDupes();
         
