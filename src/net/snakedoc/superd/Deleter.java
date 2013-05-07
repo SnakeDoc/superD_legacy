@@ -17,8 +17,6 @@
 package net.snakedoc.superd;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicOptionPaneUI;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -28,6 +26,8 @@ public class Deleter {
     public static void buildGUI(final File[] duplicates){
         JButton jb = new JButton("Delete Selected Files");
         final JList files = new JList(duplicates);
+
+        files.setFixedCellWidth(450);
         jb.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -36,8 +36,12 @@ public class Deleter {
                 for (int i = 0; i < listIndicies.length; i++){
                     filesSelected[i]= duplicates[listIndicies[i]];
                 }
+                //TODO add deletion of deleted files from jList for public release; might need to switch to ArrayList or other data model
                 for (int j = 0; j < filesSelected.length ; j++){
                     System.out.println(filesSelected[j].toString());
+                    /*TODO UNCOMMENT THIS AFTER VERIFIED WORKING
+                    filesSelected[j].delete();
+                    */
                 }
             }
         });
@@ -50,7 +54,7 @@ public class Deleter {
         panel.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(panel);
-        frame.setSize(300,800);
+        frame.setSize(500,800);
         frame.setVisible(true);
     }
     public Deleter(){
