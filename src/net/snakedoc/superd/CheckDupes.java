@@ -28,7 +28,7 @@ import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
-    
+    //TODO FIX CHECKDUPES
     private static final Logger log = Logger.getLogger(CheckDupes.class);
     
 	public static void main(String[] args) {

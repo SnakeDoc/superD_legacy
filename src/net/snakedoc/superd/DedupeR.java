@@ -17,7 +17,6 @@
 package net.snakedoc.superd;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
@@ -28,9 +27,6 @@ import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
-import net.snakedoc.jutils.io.Hasher;
-import net.snakedoc.jutils.io.HasherException;
-import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
@@ -39,15 +35,15 @@ public class DedupeR {
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
     
-	/* DEGIN DEBUG MAIN() */
+
 	public static void main (String[] args) {
 		DedupeR d = new DedupeR();
 		d.driver();
 	}
-	/* END DEBUG MAIN() */
+
 	
 	public void driver() {
-	    // get instance of MilliTimer()
+	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
         
         // start timer
@@ -58,76 +54,90 @@ public class DedupeR {
         config.loadConfig("props/log4j.properties");
         log.info("\n\n");
         log.info("Starting program!");
-        H2 db = null;
-        try {
-            db = Database.getInstance();
 
-            SysInfo sys = new SysInfo();
-    //  DedupeSQL sql = new DedupeSQL();
-        CheckDupes check = new CheckDupes();
-        
-        // this needs to be fixed so that the user passes
-        // in the argument for hashVer...
-        //
-        // also, a better name for hashVer is probably hashAlgo
-        // since it's not a version, its an algorithm we are selecting
-        //
-        // options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
-        // there is a method in Hasher (from jutils) that will validate
-        // the user input to ensure it's a supported hash algorithm.
-        String hashVer = "SHA-";
-        if (sys.getCPUArch().contains("64")) {
-            hashVer += "512";
-        } else {
-            hashVer += "256";
-        }
-        
-        try {
-            db.openConnection();
-        } catch (ClassNotFoundException | SQLException e) {
-            log.fatal("Failed to open database connection! Check config file!", e);
-        }
-        
-        Schema s = new Schema();
-        String sqlSchema = s.getSchema();
-        PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
-        try {
-            log.info("Running schema update on db: " + db.getDbPath());
-            psSchema.execute();
-            log.info("Schema update complete!");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            db.closeConnection();
-        } catch (SQLException e) {
-            log.warn("Failed to close database connection!", e);
-        }
-        
-        setup();
-        check.checkDupes();
-        // stop timer
-        timer.stopTimer();
-        log.info("Total Runtime: " + timer.getTime());
-        } catch (Exception e) {
+        //CREATE DATABASE
+        H2 db = null;
+        try {   // TODO get rid of this try/catch -- it covers the entire method 
+                // and swallows everything that does not catch. not good...
+            db = Database.getInstance();
+            
+            //Create CHECKDUPES OBJ
+
+            CheckDupes check = new CheckDupes();
+
+            //CONNECT TO DATABASE
+            try {
+                db.openConnection();
+            } catch (ClassNotFoundException | SQLException e) {
+                log.fatal("Failed to open database connection! Check config file!", e);
+            }
+
+            //LOAD DATABASE TABLES
+            Schema s = new Schema();
+            String sqlSchema = s.getSchema();
+            PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+            try {
+                log.info("Running schema update on db: " + db.getDbPath());
+                psSchema.execute();
+                log.info("Schema update complete!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                db.closeConnection();
+            } catch (SQLException e) {
+                log.warn("Failed to close database connection!", e);
+            }
+
+            //INSTEAD OF COMMAND LINE ARGUMENTS,
+            // PROMPT FOR VARIOUS SETTINGS IF
+            // USER WANTS TO DO THIS INSTEAD OF
+            // PROP FILE
+            // TODO need at least 1 cmd line argument to signal if user pompt is wanted or not... 
+            // TODO            otherwise automated runs are not possible even with props file used.
+
+            Scanner in = new Scanner(System.in);
+            System.out.println("Would you like to read from prop file or enter options now?");
+            System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
+            int choice=2;
+            try{
+                choice = in.nextInt();
+            } catch(Exception e){ // TODO find specific exceptions thrown by Scanner(System.in)
+                System.out.println("Invalid input! Proceeding using property file"); // TODO log out
+            }
+            if (choice == 1){
+                readSetup();
+            }
+
+            //END PROMPT FOR COMMAND LINE ARGUMENTS
+
+            //Run Setup() to do main logic, make calls to Walk()
+            setup();
+
+            //DATABASE now filled with all file hashes; time to look for duplicates
+            check.checkDupes();
+            // ALL DONE! stop timer
+            timer.stopTimer();
+            log.info("Total Runtime: " + timer.getTime());
+        } catch (Exception e) { // TODO get rid of this to narrow try/catch scope for improved exception handling/recovery. log out
             e.printStackTrace();
         }
 	}
 	
 	
 	public static void setup() {
-		
+		//CREATE WALKER OBJECT
+        Walker walker = new Walker(BUFFER);
 	    // load program properties
 	    Config config = new Config("props/superD.properties");
 	    
-		/** Allow multiple root directories to scan
-		 */
+        //list of directories to scan
 		ArrayList<File> rootDirs = new ArrayList<File>(1);
 		
-		// TODO possible add feature to have cmd line input at runtime to override ROOT dir
+        //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String dil = new String(config.getConfig("ROOT_DIL"));
-            String rootDirList = new String(config.getConfig("ROOT"));
+            String dil = config.getConfig("ROOT_DIL");
+            String rootDirList = config.getConfig("ROOT");
             List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
 
             for (int i=0; i < rootDirListArr.size(); i++){
@@ -136,59 +146,53 @@ public class DedupeR {
         } catch (ConfigException e) {
             log.fatal("Failed to read config file!", e);
         }
+        //Call Walker.walk() on all the directories in rootDirs
         try{
             for (int i=0; i < rootDirs.size(); i++){
                 //make sure that it is a directory
                 if (rootDirs.get(i).isDirectory()){
-                    walk(rootDirs.get(i));
+                    walker.walk(rootDirs.get(i));
                 } else {
                     log.debug(rootDirs.get(i).toString() + "  Appears to not be a directory; skipping to next in list");
                 }
             }
         //TODO replace generic Exception with specific exception(s)
-        //lets make sure we didn't accidentally put in an invalid path
 	    }catch(Exception e){
             e.printStackTrace();
         }
     }
-	
-	// Possible TODO move walk() to ScanFiles if possible if we want to?
-	public static void walk(File path){
-		
-	    Hasher hasher = new Hasher();
-	    DedupeSQL sql = new DedupeSQL();
+
+
+    /* Process command line arguments and store into properties file */
+    /* CONFIG class needs to be fixed.        */
+    /*  TODO config.setConfig overwrites entire file rather than just the specific key */
+
+    public void readSetup(){
+
         Config config = new Config("props/superD.properties");
-		int i=0;
+        Scanner in = new Scanner(System.in);
 
-		File[] contents = path.listFiles();
-		
-		for (File curFile : contents){
-			try{
-				if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
-					walk(curFile);
-				} else if (!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
+        //prompt for algorithm
+        System.out.println("Which hashing algorithm would you like to use?");
+        System.out.println("We recommend SHA-256 for 32-bit machines and SHA-512 for 64-bit machines");
+        System.out.print("Enter your choice: ");
+        String input;
+        input = in.nextLine();
+        config.setConfig("HASH_ALGO", input, false);
 
-                    //reads in HASH_ALGO from Prop File to decide which algorithm to use
-                    String hashAlgo = new String(config.getConfig("HASH_ALGO"));
-				    String file = "";
-				    String hash = "";
-				    try {
-				        file = curFile.getPath();
-				        log.debug("File: " + file);
-                        hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
-                    } catch (IOException | HasherException e1) {
-                        log.error("Failed to access and/or hash file!", e1);
-                    }
-				    
-				    sql.writeRecord(file, hash);
-				    
-					log.debug("\n\t Hash: " + hash);
-				}	
-			} catch (Exception e) {
-				log.warn("Failed to access file!", e);
-				log.debug("i: " + i + "  |  path: " + contents[i].getPath() + 
-						"  |  pathcalled: " + path.getPath());
-			}
-		}
-	}
+        //prompt for ROOT_DIL
+        System.out.println("Please enter a delimiter for root paths");
+        System.out.println("Try to use something that won't appear in the path");
+        System.out.println("We recommend ;;");
+        System.out.print("Enter choice: ");
+        input = in.nextLine();
+        config.setConfig("ROOT_DIL", input, false);
+
+        //PROMPT FOR DIRECTORIES
+        System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
+        System.out.print("Please enter: ");
+        input = in.nextLine();
+        config.setConfig("ROOT", input, false);
+    }
+
 }
