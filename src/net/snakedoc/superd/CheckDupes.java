@@ -151,7 +151,7 @@ public class CheckDupes {
 				    psInsertDupes.setLong(2, rsGetRecordId.getLong(1));
 				    psInsertDupes.execute();
 				    
-					log.info("DUPLICATE FOUND!");
+					log.info("DUPLICATE FOUND!");//TODO add duplicates to File[] and feed into Deleter.buildGUI(File[])
 					duplicateCounter++;
 					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
 					log.debug(rsCompare.getString(2));
