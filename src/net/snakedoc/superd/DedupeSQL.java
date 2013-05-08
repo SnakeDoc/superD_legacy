@@ -28,28 +28,29 @@ import net.snakedoc.jutils.database.H2;
 
 public class DedupeSQL {
     
-    private static final Logger log = Logger.getLogger(DedupeSQL.class);
-	
-	public void writeRecord(String file, String hash) {
-		
-	    Config cfg = new Config("props/superD.properties"); // TODO fix like the db connection issue, 'this' keyword and instance vars
-	    cfg.loadConfig("props/log4j.properties");  // TODO fix same as above
-		H2 db = null;
-		try {
-            db = Database.getInstance();  // TODO this is a possible problem. see todo tag on db.openConnection() below for explanation
+    private final Logger log = Logger.getLogger(DedupeSQL.class);
+    Config cfg = new Config("props/superD.properties");
+    H2 db = null;
+
+    public DedupeSQL(){
+        cfg.loadConfig("props/log4j.properties");
+        try {
+            db = Database.getInstance();
         } catch (ConfigException e2) {
             log.fatal("Failed to read config file!", e2);
         }
-		
         try {
-            db.openConnection();  // TODO this is a problem. causes new connection every iteration, solve with instance variables and using 'this' keyword.
+            db.openConnection();
         } catch (ClassNotFoundException | SQLException e1) {
             log.fatal("Failed to open database connection!", e1);
         }
+    }
+
+	public void writeRecord(String file, String hash) {
 		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ? , ?)";
 		PreparedStatement psInsert = null;
 		try {
-			psInsert = db.getConnection().prepareStatement(sqlInsert); // TODO fix like db connections
+			psInsert = db.getConnection().prepareStatement(sqlInsert);
 		} catch (SQLException e) {
 			log.error("Failed to set databse query!", e);
 		}
