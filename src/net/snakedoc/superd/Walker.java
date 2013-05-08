@@ -27,17 +27,17 @@ import java.io.IOException;
 //TODO is it possible to make these non-static without breakage?
 //TODO so if we were to thread we would require separate instances of these methods i think.
 public class Walker {
-    private static int BUFFER;
-    private static final Logger log = Logger.getLogger(DedupeR.class);
-    private static final Hasher hasher = new Hasher();
-    private static final DedupeSQL sql = new DedupeSQL();
-    private static final Config config = new Config("props/superD.properties");
+    private int BUFFER;
+    private final Logger log = Logger.getLogger(DedupeR.class);
+    private final Hasher hasher = new Hasher();
+    private final DedupeSQL sql = new DedupeSQL();
+    private final Config config = new Config("props/superD.properties");
 
     public Walker(int buffer){
         BUFFER = buffer;
     }
 
-    public static void walk(File path){
+    public void walk(File path){
         File[] contents = path.listFiles();
 
         for (File curFile : contents){
@@ -55,15 +55,15 @@ public class Walker {
         }
     }
 
-    private static boolean isValidDirectory(File curFile){
+    private boolean isValidDirectory(File curFile){
         return curFile.isDirectory() && curFile != null && !curFile.isHidden();
     }
 
-    private static boolean isValidFile(File curFile){
+    private boolean isValidFile(File curFile){
         return !curFile.isDirectory() && curFile != null && !curFile.isHidden();
     }
 
-    private static void hashFile(File curFile){
+    private void hashFile(File curFile){
         try{
         String hashAlgo = config.getConfig("HASH_ALGO");
         String file = "";
