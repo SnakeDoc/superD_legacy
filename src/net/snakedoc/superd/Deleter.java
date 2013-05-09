@@ -16,22 +16,51 @@
 
 package net.snakedoc.superd;
 
-import javax.swing.*;
+import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.io.File;
 
-public class Deleter {
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
 
-    public static void buildGUI(final File[] duplicates){
+public class Deleter extends JFrame {
+    
+    /**
+     * Serial Version UID
+     */
+    private static final long serialVersionUID = 8653510235141881228L;
+    
+    final File[] duplicates;
+    
+    // constructor
+    public Deleter(File[] duplicates) {
+        this.duplicates = duplicates;
+    }
+    
+    // block constructor that will break gui
+    public Deleter() {
+        throw new IllegalArgumentException
+            ("Invalid Constructor! Correct use: new Deleter(File[] duplicates)");
+    }
+
+    public void buildGUI(final File[] duplicates){
         //build button
-        JButton jb = new JButton("Delete Selected Files");
+ //       JButton jb = new JButton("Delete Selected Files");
         //build list box for duplicates
-        final JList files = new JList(duplicates);
+        final JList<File> files = new JList<File>(duplicates);
         //set width of list box
         files.setFixedCellWidth(450);
         //add action listener that handles deletion to jbutton jb
-        jb.addActionListener(new ActionListener(){
+ /*       jb.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e){
                 //get selected files marked for deletion
@@ -48,31 +77,71 @@ public class Deleter {
                     /*TODO UNCOMMENT THIS AFTER VERIFIED WORKING
                     filesSelected[j].delete();
                     */
-                }
+  /*              }
             }
         });
+        */
+        JButton btnExt = new JButton(" Exit ");
+        btnExt.addActionListener(new ActionListener(){
+  
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.exit(0);
+            }
+        });
+        
         //build frame for GUI
         JFrame frame = new JFrame("Select Files to Delete");
         //build panel for GUI components
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new GridLayout());
+        JPanel jPnl2 = new JPanel();
+        
+        // setup some radio buttons
+        JRadioButton rdoBtnL = new JRadioButton("File L");
+        JRadioButton rdoBtnR = new JRadioButton("File R");
+        
+        // setup button group
+        ButtonGroup btnGrp1 = new ButtonGroup();
+        btnGrp1.add(rdoBtnL);
+        btnGrp1.add(rdoBtnR);
+        
+        // register action listener
+        rdoBtnL.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e){
+            System.out.println("Clicked radio btn");
+            }
+        });
+        rdoBtnR.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e){
+            System.out.println("Clicked radio btn");
+            }
+        });
+        
+        
+        
         //set list to allow multiple selection
         files.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         //add a scrollable jlist to panel
-        panel.add(new JScrollPane(files));
+        panel.setLayout(new GridLayout(0 , 20));
+       // panel.add(new JScrollPane(files));
         //add the button
-        panel.add(jb);
+ //       panel.add(jb);
+        panel.add(rdoBtnL);
+        panel.add(rdoBtnR);
+       // jPnl2.add(btnExt);
         //set panel visible
         panel.setVisible(true);
+       // jPnl2.setVisible(true);
         //set default action of frame
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         //add panel to frame
         frame.add(panel);
+       // frame.add(jPnl2);
         //set frame size
-        frame.setSize(500,800);
+        //frame.setSize(500,800);
+        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        //frame.setUndecorated(true); // sets no frame, would need an exit button.
         //show GUI
         frame.setVisible(true);
-    }
-    public Deleter(){
-
     }
 }

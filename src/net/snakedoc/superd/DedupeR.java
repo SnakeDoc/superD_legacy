@@ -159,29 +159,35 @@ public class DedupeR {
     public void readSetup(){
 
         Config config = new Config("props/superD.properties");
-        Scanner in = new Scanner(System.in);
 
-        //prompt for algorithm
-        System.out.println("Which hashing algorithm would you like to use?");
-        System.out.println("We recommend SHA-256 for 32-bit machines and SHA-512 for 64-bit machines");
-        System.out.print("Enter your choice: ");
-        String input;
-        input = in.nextLine();
-        config.setConfig("HASH_ALGO", input, false);
+        // nifty ARM block
+        try (Scanner in = new Scanner(System.in);) {
+            
+            //prompt for algorithm
+            System.out.println("Which hashing algorithm would you like to use?");
+            System.out.println("We recommend SHA-256 for 32-bit machines and SHA-512 for 64-bit machines");
+            System.out.print("Enter your choice: ");
+            String input;
+            input = in.nextLine();
+            config.setConfig("HASH_ALGO", input, false);
 
-        //prompt for ROOT_DIL
-        System.out.println("Please enter a delimiter for root paths");
-        System.out.println("Try to use something that won't appear in the path");
-        System.out.println("We recommend ;;");
-        System.out.print("Enter choice: ");
-        input = in.nextLine();
-        config.setConfig("ROOT_DIL", input, false);
+            //prompt for ROOT_DIL
+            System.out.println("Please enter a delimiter for root paths");
+            System.out.println("Try to use something that won't appear in the path");
+            System.out.println("We recommend ;;");
+            System.out.print("Enter choice: ");
+            input = in.nextLine();
+            config.setConfig("ROOT_DIL", input, false);
 
-        //PROMPT FOR DIRECTORIES
-        System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
-        System.out.print("Please enter: ");
-        input = in.nextLine();
-        config.setConfig("ROOT", input, false);
+            //PROMPT FOR DIRECTORIES
+            System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
+            System.out.print("Please enter: ");
+            input = in.nextLine();
+            config.setConfig("ROOT", input, false);
+        }
     }
 
+    public void shutdown() {
+        // shutdown routine. move this to a GUI class i think... 
+    }
 }
