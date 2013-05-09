@@ -38,11 +38,11 @@ public class DedupeR {
 
 	public static void main (String[] args) {
 		DedupeR d = new DedupeR();
-		d.driver();
+		d.driver(args);
 	}
 
 	
-	public void driver() {
+	public void driver(String[] args) {
 	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
         
@@ -88,28 +88,17 @@ public class DedupeR {
             } catch (SQLException e) {
                 log.warn("Failed to close database connection!", e);
             }
-
-            //INSTEAD OF COMMAND LINE ARGUMENTS,
-            // PROMPT FOR VARIOUS SETTINGS IF
-            // USER WANTS TO DO THIS INSTEAD OF
-            // PROP FILE
-            // TODO need at least 1 cmd line argument to signal if user pompt is wanted or not... 
-            // TODO            otherwise automated runs are not possible even with props file used.
-
-            Scanner in = new Scanner(System.in);
-            System.out.println("Would you like to read from prop file or enter options now?");
-            System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
-            int choice=2;
-            try{
-                choice = in.nextInt();
-            } catch(Exception e){ // TODO find specific exceptions thrown by Scanner(System.in)
-                System.out.println("Invalid input! Proceeding using property file"); // TODO log out
-            }
-            if (choice == 1){
-                readSetup();
+            if (args.length<1){
+                Scanner in = new Scanner(System.in);
+                System.out.println("Would you like to read from prop file or enter options now?");
+                System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
+                int choice=2;
+                choice = Integer.parseInt(in.next());
+                if (choice == 1){
+                    readSetup();
+                }
             }
 
-            //END PROMPT FOR COMMAND LINE ARGUMENTS
 
             //Run Setup() to do main logic, make calls to Walk()
             setup();
