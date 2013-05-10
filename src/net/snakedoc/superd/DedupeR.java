@@ -17,185 +17,177 @@
 package net.snakedoc.superd;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.*;
+
+import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
-import net.snakedoc.jutils.io.Hasher;
-import net.snakedoc.jutils.io.HasherException;
-import net.snakedoc.jutils.system.SysInfo;
 
 public class DedupeR {
 
-	/* THIS IS DEBUG MAIN()
-	 * This should not be left in for deployment, only for development
-	 * Logic in main() should be moved to it's own driver method so it can be invoked
-	 * via scripts.
-	 */
+    private final static int BUFFER = 16384; // Buffer size in Bytes to use in hashing algorithm.
+                                             // Has the potential to directly impact performance.
+    
+    private static final Logger log = Logger.getLogger(DedupeR.class);
+    
+
 	public static void main (String[] args) {
-		
-		// get instance of MilliTimer()
-		MilliTimer timer = new MilliTimer();
-		
-		// start timer
-		timer.startTimer();
-		
-		// get instance of other helper objects
-		Config config = new Config("props/superD.properties");
-		H2 db = null;
-		try {
-			System.out.println(new File(config.getConfig("H2_dbURL")).getAbsolutePath());
-		} catch (ConfigException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			try {
-                db = new H2(new File(config.getConfig("H2_dbURL")).getAbsolutePath(), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
-            } catch (ConfigException e) {
-                // TODO log out (fatal)
+		DedupeR d = new DedupeR();
+		d.driver(args);
+	}
+
+	
+	public void driver(String[] args) {
+	    // get instance of MilliTimer() for benchmarking
+        MilliTimer timer = new MilliTimer();
+        
+        // start timer
+        timer.startTimer();
+        
+        // get instance of other helper objects
+        Config config = new Config("props/superD.properties");
+        config.loadConfig("props/log4j.properties");
+        log.info("\n\n");
+        log.info("Starting program!");
+
+        //CREATE DATABASE
+        H2 db = null;
+        try {   // TODO get rid of this try/catch -- it covers the entire method 
+                // and swallows everything that does not catch. not good...
+            db = Database.getInstance();
+            
+            //Create CHECKDUPES OBJ
+
+            CheckDupes check = new CheckDupes();
+
+            //CONNECT TO DATABASE
+            try {
+                db.openConnection();
+            } catch (ClassNotFoundException | SQLException e) {
+                log.fatal("Failed to open database connection! Check config file!", e);
+            }
+
+            //LOAD DATABASE TABLES
+            Schema s = new Schema();
+            String sqlSchema = s.getSchema();
+            PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+            try {
+                log.info("Running schema update on db: " + db.getDbPath());
+                psSchema.execute();
+                log.info("Schema update complete!");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-			
-		SysInfo sys = new SysInfo();
-	//	DedupeSQL sql = new DedupeSQL();
-		// TODO fix CheckDedupes class
-//		CheckDupes check = new CheckDupes();
-		
-		// this needs to be fixed so that the user passes
-		// in the argument for hashVer...
-		//
-		// also, a better name for hashVer is probably hashAlgo
-		// since it's not a version, its an algorithm we are selecting
-		//
-		// options being MD2, MD5, SHA1, SHA-256, SHA-384, SHA-512
-		// there is a method in Hasher (from jutils) that will validate
-		// the user input to ensure it's a supported hash algorithm.
-		String hashVer = "SHA-";
-		if (sys.getCPUArch().contains("64")) {
-			hashVer += "512";
-		} else {
-			hashVer += "256";
-		}
-		
-		try {
-			db.openConnection();
-		} catch (ClassNotFoundException | SQLException e) {
-			// TODO change to log out (fatal)
-			e.printStackTrace();
-		}
-		
-		Schema s = new Schema();
-		String sqlSchema = s.getSchema();
-		PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
-		try {
-			System.out.println("Running schema update on db: " + db.getDbPath());
-			psSchema.execute();
-			System.out.println("Schema update complete!");
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-        try {
-            db.closeConnection();
-        } catch (SQLException e) {
-            // TODO change to log out (warning)
+            try {
+                db.closeConnection();
+            } catch (SQLException e) {
+                log.warn("Failed to close database connection!", e);
+            }
+            if (args.length<1){
+                Scanner in = new Scanner(System.in);
+                System.out.println("Would you like to read from prop file or enter options now?");
+                System.out.print("Enter 1 to enter configuration now, 2 to use existing prop file: ");
+                int choice=2;
+                choice = Integer.parseInt(in.next());
+                if (choice == 1){
+                    readSetup();
+                }
+            }
+
+
+            //Run Setup() to do main logic, make calls to Walk()
+            setup();
+
+            //DATABASE now filled with all file hashes; time to look for duplicates
+            check.checkDupes();
+            // ALL DONE! stop timer
+            timer.stopTimer();
+            log.info("Total Runtime: " + timer.getTime());
+        } catch (Exception e) { // TODO get rid of this to narrow try/catch scope for improved exception handling/recovery. log out
             e.printStackTrace();
         }
-        
-		setup();
-		// TODO fix checkDedupes()
-//		check.checkDupes();
-/*		try {
-			db.closeConnection();
-		} catch (SQLException e) {
-			// TODO change to log out (warning)
-			e.printStackTrace();
-		}
-*/		
-		// stop timer
-		timer.stopTimer();
-		// TODO change to log out (info)
-		System.out.println("Total Runtime: " + timer.getTime());
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
 	}
-	/* END DEBUG MAIN() */
 	
 	
 	public static void setup() {
-		
-	    // load program propterties
+		//CREATE WALKER OBJECT
+        Walker walker = new Walker(BUFFER);
+	    // load program properties
 	    Config config = new Config("props/superD.properties");
 	    
-		/* TODO should not be limited to 1 directory to scan
-		 * should allow deduping multiple root directories.
-		 * this would be useful for deduping data sets that are
-		 * on two or more drives.
-		 */
-		File[] rootDirs = new File[1];
+        //list of directories to scan
+		ArrayList<File> rootDirs = new ArrayList<File>(1);
 		
-		// TODO change to user specified root directory
+        //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            rootDirs[0] = new File(config.getConfig("ROOT"));
+            String dil = config.getConfig("ROOT_DIL");
+            String rootDirList = config.getConfig("ROOT");
+            List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
+
+            for (int i=0; i < rootDirListArr.size(); i++){
+                rootDirs.add(new File(rootDirListArr.get(i)));
+            }
         } catch (ConfigException e) {
-            // TODO log out (fatal)
+            log.fatal("Failed to read config file!", e);
+        }
+        //Call Walker.walk() on all the directories in rootDirs
+        try{
+            for (int i=0; i < rootDirs.size(); i++){
+                //make sure that it is a directory
+                if (rootDirs.get(i).isDirectory()){
+                    walker.walk(rootDirs.get(i));
+                } else {
+                    log.debug(rootDirs.get(i).toString() + "  Appears to not be a directory; skipping to next in list");
+                }
+            }
+        //TODO replace generic Exception with specific exception(s)
+	    }catch(Exception e){
             e.printStackTrace();
         }
-		walk(rootDirs[0]);
-	}
-	
-	/*proof of concept walker, notifies of nullpointers when occurred. Seems to work fully now */
-	public static void walk(File path){
-		
-	    Hasher hasher = new Hasher();
-	    DedupeSQL sql = new DedupeSQL();
-	    
-		int i=0;
+    }
 
-		File[] contents = path.listFiles();
-		
-		for (File curFile : contents){
-			try{
-				if (curFile.isDirectory() && (curFile != null) && !curFile.isHidden()){
-					walk(curFile);
-				} else if (!curFile.isDirectory() && !curFile.isHidden() && curFile != null ){
-					/*hash file here and store to SQL database*/
-					/*String hash = Hasher.hash(curFile.getPath());*/
-					/*saveHash(hash, curFile.getPatch()); */
-				    String file = "";
-				    String hash = "";
-				    try {
-				        file = curFile.getPath();
-				        System.out.print("File: " + file);
-                        hash = hasher.getHash(curFile.getPath(), "SHA-512");
-                        /* Hash Algo sizes are as follows:
-                         * MD2     - 128 bits - 32 bytes  - 32 characters
-                         * MD5     - 128 bits - 32 bytes  - 32 characters
-                         * SHA1    - 160 bits - 40 bytes  - 40 characters
-                         * SHA-256 - 256 bits - 64 bytes  - 64 characters
-                         * SHA-384 - 384 bits - 96 bytes  - 96 characters
-                         * SHA-512 - 512 bits - 128 bytes - 128 characters
-                         */
-                    } catch (IOException | HasherException e1) {
-                        // TODO log out (error)
-                        e1.printStackTrace();
-                    }
-				    
-				    sql.writeRecord(file, hash);
-				    
-					System.out.println("\n\t Hash: " + hash);
-				}	
-			} catch (Exception e) {
-				// TODO change to log out (warning)
-				e.printStackTrace();
-				System.out.println("i: " + i + "  |  path: " + contents[i].getPath() + 
-						"  |  pathcalled: " + path.getPath());
-			}
-		}
-	}
+
+    /* Process command line arguments and store into properties file */
+    /* CONFIG class needs to be fixed.        */
+    /*  TODO config.setConfig overwrites entire file rather than just the specific key */
+
+    public void readSetup(){
+
+        Config config = new Config("props/superD.properties");
+
+        // nifty ARM block
+        try (Scanner in = new Scanner(System.in);) {
+            
+            //prompt for algorithm
+            System.out.println("Which hashing algorithm would you like to use?");
+            System.out.println("We recommend SHA-256 for 32-bit machines and SHA-512 for 64-bit machines");
+            System.out.print("Enter your choice: ");
+            String input;
+            input = in.nextLine();
+            config.setConfig("HASH_ALGO", input, false);
+
+            //prompt for ROOT_DIL
+            System.out.println("Please enter a delimiter for root paths");
+            System.out.println("Try to use something that won't appear in the path");
+            System.out.println("We recommend ;;");
+            System.out.print("Enter choice: ");
+            input = in.nextLine();
+            config.setConfig("ROOT_DIL", input, false);
+
+            //PROMPT FOR DIRECTORIES
+            System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
+            System.out.print("Please enter: ");
+            input = in.nextLine();
+            config.setConfig("ROOT", input, false);
+        }
+    }
+
+    public void shutdown() {
+        // shutdown routine. move this to a GUI class i think... 
+    }
 }

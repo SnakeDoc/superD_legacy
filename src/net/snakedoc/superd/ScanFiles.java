@@ -25,6 +25,10 @@ import net.snakedoc.jutils.io.HasherException;
 import net.snakedoc.jutils.io.Hasher;
 
 public class ScanFiles extends DirectoryScanner {
+    
+    private final static int BUFFER = 16384; // Buffer size in Bytes to use in hashing algorithm.
+                                             // Has the potential to directly impact performance.
+    
 	public static List<File> scanFiles(String dir, DeDupeObj[] deDupeObj) throws IOException {
 		//DedupeR.count++;
 		System.out.println("SCANFILES CLASS");
@@ -40,7 +44,7 @@ public class ScanFiles extends DirectoryScanner {
 				String file = files.get(i).toString();
 				String hash = "";
                 try {
-                    hash = getHash.getHash(files.get(i).toString(), "SHA-512");
+                    hash = getHash.getHash(files.get(i).toString(), "SHA-512", BUFFER);
                 } catch (HasherException e) {
                     //TODO log out
                     e.printStackTrace();

@@ -1,4 +1,5 @@
 bin/
+target/
 src/testing
 .classpath
 .project
@@ -10,3 +11,7 @@ src/testing
 *.trace.db.*
 *.lock.db
 *.h2.db
+.idea
+out/
+superD.iml
+*.log*

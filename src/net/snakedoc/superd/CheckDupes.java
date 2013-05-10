@@ -20,55 +20,46 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
+    //TODO FIX CHECKDUPES
+    private static final Logger log = Logger.getLogger(CheckDupes.class);
+    
 	public static void main(String[] args) {
-//	    Config config = new Config("props/superD.properties");
-//		H2 db = null;
- //       try {
-  //          db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
-   //     } catch (ConfigException e2) {
-    //        // TODO log out (error)
-     //       e2.printStackTrace();
-      //  }
 		CheckDupes cd = new CheckDupes();
-//		try {
- //           db.openConnection();
-  //      } catch (ClassNotFoundException e1) {
-   //         // TODO log out (fatal) - means driver for database is not found
-    //        e1.printStackTrace();
-     //   } catch (SQLException e1) {
-       //     // TODO log out (fatal)
-        //    e1.printStackTrace();
-   //     }
 		cd.checkDupes();
-//		try {
- //           db.closeConnection();
-  //      } catch (SQLException e) {
-    //        // TODO log out (warning)
-     //       e.printStackTrace();
-      //  }
 	}
 	public void checkDupes() {
 	    Config config = new Config("props/superD.properties");
+	    config.loadConfig("props/log4j.properties");
 	    // SQL statements
-	    String sqlCount = "SELECT COUNT(file_hash) FROM files";
+	    String sqlCount = "SELECT COUNT(*) FROM files";
 		String sqlGetHashes = "SELECT file_hash, file_path FROM files";
-		String sqlCompare = "SELECT file_hash, file_path FROM files " +
-				"WHERE file_hash = ? AND file_path NOT LIKE ?";
+		String sqlCompare = "SELECT record_id, file_hash, file_path FROM files " +
+				"WHERE file_hash = ? AND file_path != ?";
+		String sqlGetRecordId = "SELECT record_id FROM files WHERE file_path = ?";
+		String sqlInsertDupes = "INSERT INTO duplicates (dupe1_id, dupe2_id) VALUES(? , ?)";
+		String sqlCountBytes = "SELECT SUM(files.file_size) FROM files JOIN duplicates ON files.record_id = duplicates.dupe1_id;";
 		
 		// Prepared Statements (NULL)
 		PreparedStatement psCount = null;
 		PreparedStatement psGetHashes = null;
 		PreparedStatement psCompare = null;
+		PreparedStatement psGetRecordId = null;
+		PreparedStatement psInsertDupes = null;
+		PreparedStatement psCountBytes = null;
 		
 		// Result Sets (NULL)
 		ResultSet rsCount = null;
 		ResultSet rsGetHashes = null;
 		ResultSet rsCompare = null;
+		ResultSet rsGetRecordId = null;
+		ResultSet rsCountBytes = null;
 		
 		// Object to hold duplicate data
 		DeDupeObj[] deDupeObj = null;
@@ -81,42 +72,42 @@ public class CheckDupes {
 		// setup database object
 		H2 db = null;
         try {
-            db = new H2(config.getConfig("H2_dbURL"), config.getConfig("H2_dbUser"), config.getConfig("H2_dbPass"));
+            db = Database.getInstance();
         } catch (ConfigException e2) {
-            // TODO log out (error)
-            e2.printStackTrace();
+            log.error("Failed to read config file!", e2);
         }
         try {
             db.openConnection();
         } catch (ClassNotFoundException e1) {
-            // TODO log out (fatal) - means driver for database is not found
-            e1.printStackTrace();
+            // means driver for database is not found
+            log.fatal("Failed to read the database!", e1);
         } catch (SQLException e1) {
-            // TODO log out (fatal)
-            e1.printStackTrace();
+            log.fatal("Failed to open database!", e1);
         }
 		
 		// let's get to business...
 		
-        // initalize our prepared statements
+        // initialize our prepared statements
 		try {
 			psCount = db.getConnection().prepareStatement(sqlCount);
 			psGetHashes = db.getConnection().prepareStatement(sqlGetHashes);
 			psCompare = db.getConnection().prepareStatement(sqlCompare);
+			psGetRecordId = db.getConnection().prepareStatement(sqlGetRecordId);
+			psInsertDupes = db.getConnection().prepareStatement(sqlInsertDupes);
+			psCountBytes = db.getConnection().prepareStatement(sqlCountBytes);
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error setting database statements!", e);
 		}
 		try {
 			rsCount = psCount.executeQuery();
+			rsCount.next();
 			// REPLACE WITH LIST<> or HASHMAP //
 			hash_count = rsCount.getInt(1);
 			psCount.clearParameters();
 			rsCount.close();
 			psCount.close();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error running database queries!", e);
 		}
 		
 		// set deDupeObj array to size of hash_count (number of hashes in database)
@@ -125,15 +116,14 @@ public class CheckDupes {
 		try {
 		    rsGetHashes = psGetHashes.executeQuery();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-		    e.printStackTrace();
+		    log.error("Error running database queries!", e);
 		}
 		    
 		try {
 			while(rsGetHashes.next()) {
 				deDupeObj[loopCounter] = new DeDupeObj();
-				deDupeObj[loopCounter].filehash = rsGetHashes.getString(0);
-				deDupeObj[loopCounter].filepath = rsGetHashes.getString(1);
+				deDupeObj[loopCounter].filehash = rsGetHashes.getString(1);
+				deDupeObj[loopCounter].filepath = rsGetHashes.getString(2);
 				
 				loopCounter++;
 			}
@@ -141,33 +131,39 @@ public class CheckDupes {
 			psGetHashes.clearParameters();
 			psGetHashes.close();
 		} catch (SQLException e) {
-		    // TODO log out (error)
-			e.printStackTrace();
+			log.error("Error running database queries!", e);
 		}
 		for (int i = 0; i < deDupeObj.length; i++) {
 			try {
 				psCompare.setString(1, deDupeObj[i].filehash);
 				psCompare.setString(2, deDupeObj[i].filepath);
 				
-				if(psCompare.execute()) {
+				rsCompare = psCompare.executeQuery();
 				    
-				    rsCompare = psCompare.getResultSet();
+				while(rsCompare != null && rsCompare.next()) {
 				    
-				    //TODO all sys out's change to log out (info)
-					System.out.println("DUPLICATE FOUND!");
+				    psGetRecordId.setString(1, deDupeObj[i].filepath);
+				    rsGetRecordId = psGetRecordId.executeQuery();
+				    rsGetRecordId.next();
+				    
+				    // write dupe id numbers to table
+				    psInsertDupes.setLong(1, rsCompare.getLong(1));
+				    psInsertDupes.setLong(2, rsGetRecordId.getLong(1));
+				    psInsertDupes.execute();
+				    
+					log.info("DUPLICATE FOUND!");//TODO add duplicates to File[] and feed into Deleter.buildGUI(File[])
 					duplicateCounter++;
-					System.out.println(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
-					System.out.print(rsCompare.getString(1));
-					System.out.print(" | ");
-					System.out.println(rsCompare.getString(0));
+					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
+					log.debug(rsCompare.getString(2));
+					log.debug("");
+					log.info(deDupeObj[i].filepath + " | " + rsCompare.getString(3));
 					
 					rsCompare.close();
 					rsCompare = null;
 				}
 				psCompare.clearParameters();
 			} catch (SQLException e) {
-			    // log out (warning)
-				e.printStackTrace();
+				log.warn("Failed to query database!", e);
 				// continue running and find next dupe
 				continue;
 			}
@@ -176,15 +172,36 @@ public class CheckDupes {
 			psCompare.clearParameters();
 			psCompare.close();
 		} catch (SQLException e) {
-		    //TODO log out (warning)
-			e.printStackTrace();
+			log.warn("Failed to close resource!", e);
 		}
-		System.out.println("Number of Duplicates Found: " + duplicateCounter);
+		long bytes = 0L;
+		try {
+		    rsCountBytes = psCountBytes.executeQuery();
+		    if (rsCountBytes.next()) {
+		        bytes = rsCountBytes.getLong(1);
+		    }
+		    rsCountBytes.close();
+		    psCountBytes.close();
+		} catch (SQLException e) {
+		    log.error("Failed to get statistics!", e);
+		}
+		log.info("\n\n\t\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		log.info("Number of Duplicates Found: " + duplicateCounter);
+		log.info(" out of " + hash_count + " files");
+		log.info(String.format("\nThat means %.2f%% of your files are duplicates!\n", (((double)duplicateCounter / (double)hash_count) * 100)));
+		
+		if (bytes >= 1073741824) { // if greater than or equal to 1GB then display in GB's
+		    log.info(String.format("This accounts for about %.2f GB of wasted storage!", 
+		                    ((double)bytes / (double)1073741824))); // divide by number of bytes in 1 GB
+		} else {
+		    log.info(String.format("This accounts for about %.2f MB of wasted storage!", 
+		                    ((double)bytes / (double)1048576))); // divide by number of bytes in 1 MB
+		}
+		
 		try {
             db.closeConnection();
         } catch (SQLException e) {
-            // TODO log out (warning)
-            e.printStackTrace();
+            log.warn("Failed to close resource!", e);
         }
 	}
 }

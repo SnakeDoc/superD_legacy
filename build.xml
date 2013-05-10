@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="superD">
+    <property environment="env"/>
+	<property name="DEPLOY_DIR" value="/var/www/net.snakedoc/projects/superd/deploy"/>
+	<property name="DRY_DEPLOY_DIR" value="/var/www/net.snakedoc/projects/superd/dry_deploy"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+	<property environment="env"/>
+	<property name="build_number" value="${env.BUILD_NUMBER}"/>
+    <property name="dest_dir" value="target"/>
+    <property name="tmp_dir" value="tmp"/>
+    <property name="proj_name" value="superD"/>
+	<property name="version_major" value="0"/>
+	<property name="version_minor" value="1"/>
+	<property name="version_sub" value="${build_number}"/>
+    <tstamp>
+    	<format property="build.datestamp" pattern="yyyy-MM-dd" locale="en,US"/>
+    </tstamp>
+    <path id="superD.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/h2-1.3.170.jar"/>
+    	<pathelement location="lib/JUtils.jar"/>
+        <pathelement location="lib/log4j-1.2.17.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="${dest_dir}"/>
+    	<mkdir dir="${dest_dir}/dist"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/src"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/props"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/doc"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/lib"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/logs"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/db"/>
+    	<mkdir dir="${dest_dir}/${tmp_dir}/META-INF"/>
+        <copy includeemptydirs="false" todir="${dest_dir}">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    	<copy includeemptydirs="false" todir="${dest_dir}/${tmp_dir}">
+    		<fileset dir=".">
+    			<include name="**/*"/>
+    			<exclude name="doc/**"/>
+    			<exclude name="target/**"/>
+    			<exclude name="logs/**"/>
+    			<exclude name="bin/**"/>
+    		</fileset>
+    	</copy>
+    </target>
+    <target name="clean">
+        <delete dir="${dest_dir}"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project,pkg-distro" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${dest_dir}/${tmp_dir}" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="superD.classpath"/>
+        </javac>
+    </target>
+    <target name="create_manifest">
+        <manifest file="${dest_dir}/${tmp_dir}/META-INF/MANIFEST.MF">
+            <attribute name="Manifest-Version" value="1.0"/>
+            <attribute name="Website" value="www.snakedoc.net"/>
+            <attribute name="Project" value="${proj_name}-${version_major}.${version_minor}.${version_sub}"/>
+        </manifest>
+    </target>
+    <target depends="create_manifest" name="jar">
+        <jar destfile="${dest_dir}/${proj_name}-${version_major}.${version_minor}.${version_sub}.jar" 
+        	basedir="${dest_dir}/${tmp_dir}" update="true" 
+        	manifest="${dest_dir}/${tmp_dir}/META-INF/MANIFEST.MF"
+        	excludes="props/** src/** lib/** doc/** build.xml"/>
+        <move file="${dest_dir}/${proj_name}-${version_major}.${version_minor}.${version_sub}.jar" todir="${dest_dir}/${tmp_dir}"></move>
+    </target>
+	<target depends="clean,build" name="deploy">
+		<move file="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip" todir="${DEPLOY_DIR}"/>
+		<echo>Nightly build deployed successfully!</echo>
+	</target>
+	<target depends="clean,build" name="dry_deploy">
+		<move file="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip" todir="${DRY_DEPLOY_DIR}"/>
+		<echo>Nightly build deployed successfully!</echo>
+	</target>
+	<target depends="jar, javadoc" name="pkg-distro" description="Build the distributable ZIP for superD">
+	    <zip destfile="${dest_dir}/dist/${proj_name}-${version_major}.${version_minor}.${version_sub}.zip">
+	        <fileset file="LICENSE"/>
+	    	<fileset file="README"/>
+	    	<fileset file="*.*"/>
+	    	<zipfileset dir="${dest_dir}/${tmp_dir}">
+	    		<patternset id="superd.dist.jar">
+	    			<include name ="**/${proj_name}*.jar"/>
+	    		</patternset>
+	    	</zipfileset>
+	        <zipfileset dir="${dest_dir}/${tmp_dir}/props" prefix="props">
+	            <patternset id="superd.dist.props">
+	                <include name ="**/*.properties"/>
+	            </patternset>
+	        </zipfileset>
+	        <zipfileset dir="${dest_dir}/${tmp_dir}/lib" prefix="lib">
+	            <patternset id="superd.dist.libs">
+	            	<exclude name =".keepme"/>
+	                <include name ="**/*"/>
+	            </patternset>
+	        </zipfileset>
+	    	<zipfileset dir="${dest_dir}/${tmp_dir}/db" prefix="db">
+	            <patternset id="superd.dist.db">
+	    		    <exclude name =".keepme"/>
+	    		    <include name ="**/*"/>
+	    		</patternset>
+	        </zipfileset>
+	    	<zipfileset dir="${dest_dir}/${tmp_dir}/src" prefix="src">
+	            <patternset id="superd.dist.src">
+	    		    <include name ="**/*.java"/>
+	    	    </patternset>
+	        </zipfileset>
+	        <zipfileset dir="doc" prefix="doc"/>
+	    </zip>
+	</target>
+	<target name="javadoc">
+	    <javadoc access="private" author="true" classpath="lib/h2-1.3.170.jar;lib/log4j-1.2.17.jar;lib/JUtils-2013-04-27.jar" 
+	    		destdir="doc" doctitle="superD - A file duplication utility in pure Java." nodeprecated="false" nodeprecatedlist="false" 
+	    		noindex="false" nonavbar="false" notree="false" packagenames="net.snakedoc.superd" source="1.7" sourcepath="src" 
+	    		splitindex="true" use="true" version="true">
+	        <link href="http://download.oracle.com/javase/7/docs/api/"/>
+        </javadoc>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+</project>
