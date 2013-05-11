@@ -46,6 +46,8 @@ public class DedupeR {
 	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
         
+        Notice notice = new Notice();
+        
         // start timer
         timer.startTimer();
         
@@ -54,6 +56,8 @@ public class DedupeR {
         config.loadConfig("props/log4j.properties");
         log.info("\n\n");
         log.info("Starting program!");
+        
+        System.out.println(notice.get_superD_ascii());
 
         //CREATE DATABASE
         H2 db = null;
