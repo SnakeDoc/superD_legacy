@@ -19,7 +19,7 @@ package net.snakedoc.superd;
 
 public class Notice {
 
-    private String superD_ascii = "                                                                                \n" + 
+    private String superD_ascii = "                                                                                \n" +   // increase font size of logo
                                   "                                                     ___                        \n" +
                                   "                          ___ _   _ _ __   ___ _ __ /   \\                      \n" +
                                   "                         / __| | | | '_ \\ / _ \\ '_// /\\ /                    \n" +
