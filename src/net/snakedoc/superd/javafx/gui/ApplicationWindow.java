@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.superd.DedupeR;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
 import javafx.application.Application;
@@ -142,6 +143,10 @@ public class ApplicationWindow extends Application {
                 
                 buttonDedupe.setDisable(true);
                 
+                DedupeR deduper = new DedupeR();
+                String str[] = { };//{ "-d" };
+                deduper.driver(str);
+                
             }
             
         });
@@ -231,6 +236,12 @@ public class ApplicationWindow extends Application {
         this.delimiterTextField = new TextField();
         this.delimiterTextField.setMinWidth(25);
         this.delimiterTextField.setMaxWidth(25);
+        try {
+            this.delimiterTextField.setText(cfg.getConfig("ROOT_DEL"));
+        } catch (ConfigException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
         final Button buttonDelimiter = new Button("Set Delimiter");
         buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
