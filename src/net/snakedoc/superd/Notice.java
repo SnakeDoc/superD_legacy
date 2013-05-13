@@ -19,9 +19,9 @@ package net.snakedoc.superd;
 
 public class Notice {
 
-    private String superD_ascii = "                                                                                \n" +   // increase font size of logo
-                                  "                                                     ___                        \n" +
-                                  "                          ___ _   _ _ __   ___ _ __ /   \\                      \n" +
+    private String superD_ascii = "                                                                                \n" +   // TODO: increase font size of logo
+                                  "                                                     ___                        \n" +   // do not remove the extra backslashes,
+                                  "                          ___ _   _ _ __   ___ _ __ /   \\                      \n" +   //  they are needed
                                   "                         / __| | | | '_ \\ / _ \\ '_// /\\ /                    \n" +
                                   "                         \\__ \\ |_| | |_) |  __/ | / /_//                      \n" +
                                   "                         |___/\\__,_| .__/ \\___|_|/___,'                       \n" +
