@@ -15,3 +15,4 @@ src/testing
 out/
 superD.iml
 *.log*
+props/superD.properties
