@@ -117,6 +117,15 @@ public class DedupeR {
         }
 	}
 	
+//	private void printHelp() {
+//	    System.out.print(
+//	            "superD Help Page\n" +
+//	            "\t[directory] [hash_algo]\n" +
+//	            "\t-d Read properties file for directory and hash algo\n" +
+//	            
+//	            );
+//	}
+	
 	
 	public static void setup() {
 		//CREATE WALKER OBJECT
@@ -129,7 +138,7 @@ public class DedupeR {
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String dil = config.getConfig("ROOT_DIL");
+            String dil = config.getConfig("ROOT_DEL");
             String rootDirList = config.getConfig("ROOT");
             List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
 

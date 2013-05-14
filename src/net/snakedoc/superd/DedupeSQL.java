@@ -54,13 +54,13 @@ public class DedupeSQL {
 		} catch (SQLException e) {
 			log.error("Failed to set databse query!", e);
 		}
-		
+		File fl = new File(file);
 		try {
 			psInsert.setString(1, file);
 			psInsert.setString(2, hash);
-			psInsert.setLong(3, (new File(file).length()));
+			psInsert.setLong(3, (fl.length()));
 			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
-			psInsert.executeUpdate();	
+			psInsert.executeUpdate();
 		} catch (SQLException e) {
 			log.error("Failed to query database!", e);
 		}
