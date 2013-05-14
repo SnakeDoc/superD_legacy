@@ -184,13 +184,13 @@ public class DedupeR {
             input = in.nextLine();
             config.setConfig("HASH_ALGO", input, false);
 
-            //prompt for ROOT_DIL
+            //prompt for ROOT_DEL
             System.out.println("Please enter a delimiter for root paths");
             System.out.println("Try to use something that won't appear in the path");
             System.out.println("We recommend ;;");
             System.out.print("Enter choice: ");
             input = in.nextLine();
-            config.setConfig("ROOT_DIL", input, false);
+            config.setConfig("ROOT_DEL", input, false);
 
             //PROMPT FOR DIRECTORIES
             System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
