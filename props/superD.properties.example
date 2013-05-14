@@ -1,0 +1,54 @@
+/**
+*  SuperD Configuration file. Copy this file to superD.properties
+*  and complete environment configuration.
+**/
+superD_VERSION = 0.1.0 // @ToDo: Refactor outside of the user configuration file
+
+/**
+* Hash Algorithm
+*
+* If left blank, must be passed in from cmd line flag such as -SHA-256
+*
+* Options:
+* MD2, MD5, SHA-1, SHA-256,SHA-384, SHA-512
+**/
+HASH_ALGO=SHA-512
+
+/**
+* Root Delimeter
+*
+* Represents the delimiter separating multiple root directories in Root
+*
+* Note:    Use a delimiter pattern that won't be found in the file path
+* Example: ROOT_DIL = ;;
+*          C:/Users/980x/Documents/dir1;;/dir2;;/dir3;;/dir4
+**/
+ROOT_DIL=;; //@ToDo: This is spelled incorrectly.
+
+/**
+* Specify ROOT directory
+*
+* Examples:
+* Linux and Mac:    /path/to/directory
+*                   /mount/point
+*
+* Windows:  C:\\
+*           C:\\path\\to\\directory
+**/
+ROOT=
+
+/**
+* Generally leave the db config alone
+*
+* dbURL format:
+*
+* Linux and Mac:
+* dbURL=/path/to/db/file
+*
+* Windows:
+* dbURL=C:\\path\\to\\db\\file
+**/
+H2_dbURL=db\\superD
+H2_dbUser=superD
+//@ToDo: Can the user create the password? IE: Keep it out of the code in the repository
+H2_dbPass=3xtr3m3
