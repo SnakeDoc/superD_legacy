@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.dedupe;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

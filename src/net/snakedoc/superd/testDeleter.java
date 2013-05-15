@@ -2,6 +2,8 @@ package net.snakedoc.superd;
 
 import java.io.File;
 
+import net.snakedoc.superd.dedupe.Deleter;
+
 /*USED TO TEST DELETER CLASS DURING CONSTRUCTION
 */
 

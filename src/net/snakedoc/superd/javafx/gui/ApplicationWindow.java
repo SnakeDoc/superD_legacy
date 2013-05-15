@@ -6,8 +6,8 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
-import net.snakedoc.superd.DedupeR;
 import net.snakedoc.superd.javafx.gui.model.TableData;
+import net.snakedoc.superd.launcher.DedupeR;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;

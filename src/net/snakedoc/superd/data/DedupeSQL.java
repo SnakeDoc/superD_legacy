@@ -14,21 +14,43 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.data;
 
-import net.snakedoc.jutils.io.ReadFileToString;
+import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
-public class Schema {
-	public String getSchema() {
-		ReadFileToString readFile = new ReadFileToString();
-		return cleanString(readFile.readFromFile("schema.sql"), "\\n");
-	}
-	public String cleanString(String input, String stripChars) {
-		String output = "";
-		String[] temp = input.split(stripChars);
-		for (int i = 0; i < temp.length; i++) {
-			output += temp[i];
+import org.apache.log4j.Logger;
+
+import net.snakedoc.jutils.Config;
+import net.snakedoc.jutils.ConfigException;
+
+public class DedupeSQL {
+    
+    private final Logger log = Logger.getLogger(DedupeSQL.class);
+    Config cfg = new Config("props/superD.properties");
+
+    public DedupeSQL(){
+        cfg.loadConfig("props/log4j.properties");
+    }
+
+	public void writeRecord(String file, String hash) {
+		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ? , ?)";
+		PreparedStatement psInsert = null;
+		try {
+			psInsert = Database.getInstance().getConnection().prepareStatement(sqlInsert);
+		} catch (SQLException e) {
+			log.error("Failed to set databse query!", e);
 		}
-		return output;
+		File fl = new File(file);
+		try {
+			psInsert.setString(1, file);
+			psInsert.setString(2, hash);
+			psInsert.setLong(3, (fl.length()));
+			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
+			psInsert.executeUpdate();
+		} catch (SQLException e) {
+			log.error("Failed to query database!", e);
+		}
 	}
 }
