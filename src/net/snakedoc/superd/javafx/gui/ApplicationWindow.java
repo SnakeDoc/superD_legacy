@@ -37,6 +37,7 @@ import javafx.stage.Stage;
 public class ApplicationWindow extends Application {
     
     private static String TOP_STYLE = "-fx-background-color: #336699;";
+    @SuppressWarnings("unused")
     private static String CENTER_STYLE = "-fx-background-color: #113B63;";
     
     private TextField targetTextField = null;
@@ -164,6 +165,7 @@ public class ApplicationWindow extends Application {
                 
                 new Thread(task).start();
                 
+                @SuppressWarnings("unused")
                 final Task<Void> taskUpdateDisplay = new Task<Void>() {
                     @Override
                     public void run() {

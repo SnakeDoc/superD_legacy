@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
-import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 import net.snakedoc.superd.data.Database;
 import net.snakedoc.superd.data.DeDupeObj;

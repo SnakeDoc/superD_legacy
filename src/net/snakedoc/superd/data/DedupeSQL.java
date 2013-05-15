@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
-import net.snakedoc.jutils.ConfigException;
 
 public class DedupeSQL {
     

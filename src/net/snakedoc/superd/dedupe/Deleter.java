@@ -23,11 +23,11 @@ import java.io.File;
 
 public class Deleter {
 
-    public static void buildGUI(final File[] duplicates){
+    public void buildGUI(final File[] duplicates){
         //build button
         JButton jb = new JButton("Delete Selected Files");
         //build list box for duplicates
-        final JList files = new JList(duplicates);
+        final JList<File> files = new JList<File>(duplicates);
         //set width of list box
         files.setFixedCellWidth(450);
         //add action listener that handles deletion to jbutton jb

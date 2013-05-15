@@ -21,7 +21,6 @@ import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
 
 import java.io.File;
-import java.sql.SQLException;
 
 /**
  * Singleton Pattern

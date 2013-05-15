@@ -107,6 +107,7 @@ public class DedupeR {
                 if (choice == 1){
                     readSetup();
                 }
+                in.close(); // close resource
             }
 
             //Run Setup() to do main logic, make calls to Walk()
@@ -133,9 +134,9 @@ public class DedupeR {
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String dil = config.getConfig("ROOT_DEL");
+            String del = config.getConfig("ROOT_DEL");
             String rootDirList = config.getConfig("ROOT");
-            List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
+            List<String> rootDirListArr = Arrays.asList(rootDirList.split(del));
 
             for (int i=0; i < rootDirListArr.size(); i++){
                 rootDirs.add(new File(rootDirListArr.get(i)));
@@ -179,13 +180,13 @@ public class DedupeR {
             input = in.nextLine();
             config.setConfig("HASH_ALGO", input, false);
 
-            //prompt for ROOT_DIL
+            //prompt for ROOT_DEL
             System.out.println("Please enter a delimiter for root paths");
             System.out.println("Try to use something that won't appear in the path");
             System.out.println("We recommend ;;");
             System.out.print("Enter choice: ");
             input = in.nextLine();
-            config.setConfig("ROOT_DIL", input, false);
+            config.setConfig("ROOT_DEL", input, false);
 
             //PROMPT FOR DIRECTORIES
             System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
