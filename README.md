@@ -2,7 +2,7 @@
 
 ## Written in pure Java
 
-### Copyright (c) 2013 superD contributors, snakedoc.net and others | All Rights Reserved
+#### Copyright (c) 2013 superD contributors, snakedoc.net and others | All Rights Reserved
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
