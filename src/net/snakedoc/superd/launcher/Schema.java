@@ -14,14 +14,14 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.launcher;
 
 import net.snakedoc.jutils.io.ReadFileToString;
 
 public class Schema {
 	public String getSchema() {
 		ReadFileToString readFile = new ReadFileToString();
-		return cleanString(readFile.readFromFile("schema.sql"), "\\n");
+		return cleanString(readFile.readFromFile("db/schema.sql"), "\\n");
 	}
 	public String cleanString(String input, String stripChars) {
 		String output = "";

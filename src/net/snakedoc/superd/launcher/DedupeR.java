@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.launcher;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -27,6 +27,10 @@ import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
 import net.snakedoc.jutils.database.H2;
+import net.snakedoc.superd.Notice;
+import net.snakedoc.superd.data.Database;
+import net.snakedoc.superd.dedupe.CheckDupes;
+import net.snakedoc.superd.filescan.Walker;
 
 public class DedupeR {
 

@@ -1,4 +1,4 @@
-package net.snakedoc.superd;
+package net.snakedoc.superd.gui;
 
 import java.awt.Color;
 import java.awt.GridLayout;

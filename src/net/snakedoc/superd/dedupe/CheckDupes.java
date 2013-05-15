@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.dedupe;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.database.H2;
+import net.snakedoc.superd.data.Database;
+import net.snakedoc.superd.data.DeDupeObj;
 
 public class CheckDupes {
     //TODO FIX CHECKDUPES
@@ -122,8 +124,8 @@ public class CheckDupes {
 		try {
 			while(rsGetHashes.next()) {
 				deDupeObj[loopCounter] = new DeDupeObj();
-				deDupeObj[loopCounter].filehash = rsGetHashes.getString(1);
-				deDupeObj[loopCounter].filepath = rsGetHashes.getString(2);
+				deDupeObj[loopCounter].setFileHash(rsGetHashes.getString(1));
+				deDupeObj[loopCounter].setFilePath(rsGetHashes.getString(2));
 				
 				loopCounter++;
 			}
@@ -135,14 +137,14 @@ public class CheckDupes {
 		}
 		for (int i = 0; i < deDupeObj.length; i++) {
 			try {
-				psCompare.setString(1, deDupeObj[i].filehash);
-				psCompare.setString(2, deDupeObj[i].filepath);
+				psCompare.setString(1, deDupeObj[i].getFileHash());
+				psCompare.setString(2, deDupeObj[i].getFilePath());
 				
 				rsCompare = psCompare.executeQuery();
 				    
 				while(rsCompare != null && rsCompare.next()) {
 				    
-				    psGetRecordId.setString(1, deDupeObj[i].filepath);
+				    psGetRecordId.setString(1, deDupeObj[i].getFilePath());
 				    rsGetRecordId = psGetRecordId.executeQuery();
 				    rsGetRecordId.next();
 				    
@@ -153,10 +155,10 @@ public class CheckDupes {
 				    
 					log.info("DUPLICATE FOUND!");//TODO add duplicates to File[] and feed into Deleter.buildGUI(File[])
 					duplicateCounter++;
-					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
+					log.debug(deDupeObj[i].getFilePath() + " | " + deDupeObj[i].getFileHash());
 					log.debug(rsCompare.getString(2));
 					log.debug("");
-					log.info(deDupeObj[i].filepath + " | " + rsCompare.getString(3));
+					log.info(deDupeObj[i].getFilePath() + " | " + rsCompare.getString(3));
 					
 					rsCompare.close();
 					rsCompare = null;

@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.data;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
