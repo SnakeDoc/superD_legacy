@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.filescan;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,8 @@ import java.util.List;
 import net.snakedoc.jutils.io.DirectoryScanner;
 import net.snakedoc.jutils.io.HasherException;
 import net.snakedoc.jutils.io.Hasher;
+import net.snakedoc.superd.data.DeDupeObj;
+import net.snakedoc.superd.data.DedupeSQL;
 
 public class ScanFiles extends DirectoryScanner {
     

@@ -6,12 +6,13 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
-import net.snakedoc.superd.DedupeR;
 import net.snakedoc.superd.javafx.gui.model.TableData;
+import net.snakedoc.superd.launcher.DedupeR;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -36,12 +37,16 @@ import javafx.stage.Stage;
 public class ApplicationWindow extends Application {
     
     private static String TOP_STYLE = "-fx-background-color: #336699;";
+    @SuppressWarnings("unused")
     private static String CENTER_STYLE = "-fx-background-color: #113B63;";
     
     private TextField targetTextField = null;
     private TextField delimiterTextField = null;
     
     private Config cfg = new Config("props/superD.properties");
+    
+    @SuppressWarnings("rawtypes")
+    private static ObservableList data = null;
     
     /**
      * @param args the command line arguments
@@ -143,10 +148,38 @@ public class ApplicationWindow extends Application {
                 
                 buttonDedupe.setDisable(true);
                 
-                DedupeR deduper = new DedupeR();
-                String str[] = { };//{ "-d" };
-                deduper.driver(str);
+                final Task<Void> task = new Task<Void>() {
+                    @Override
+                    public void run() {
+                        DedupeR deduper = new DedupeR();
+                        String str[] = { "-d" };
+                        deduper.driver(str);
+                    }
+
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                };
                 
+                new Thread(task).start();
+                
+                @SuppressWarnings("unused")
+                final Task<Void> taskUpdateDisplay = new Task<Void>() {
+                    @Override
+                    public void run() {
+                        while (task.isRunning()) {
+                            
+                        }
+                    }
+                    
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                };
             }
             
         });
@@ -244,17 +277,17 @@ public class ApplicationWindow extends Application {
         }
         
         final Button buttonDelimiter = new Button("Set Delimiter");
-        buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
+ /*       buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
             public void handle(ActionEvent event) {
 
-                cfg.setConfig("ROOT_DIL", delimiterTextField.getText(), false);
+                cfg.setConfig("ROOT_DEL", delimiterTextField.getText(), false);
                 
             }
             
         });
-        
+   */     
         delimiterHBox.getChildren().addAll(this.delimiterTextField, buttonDelimiter);
         
         centerTextVBox.getChildren().addAll(this.targetTextField, delimiterHBox);
@@ -296,7 +329,7 @@ public class ApplicationWindow extends Application {
 
         TableView<String> table = new TableView<String>();
         table.setMaxWidth(1000);
-        table.setEditable(false);
+        table.setEditable(true);
         
         TableColumn fileNameCol = new TableColumn("File Name");
         fileNameCol.setMinWidth(100);
@@ -316,7 +349,7 @@ public class ApplicationWindow extends Application {
         table.getColumns().addAll(fileNameCol, directoryCol, sizeCol, hashAlgoCol, fileHashCol);
         
         // set some blank data so our table will be visible
-        ObservableList data = 
+        data = 
                 FXCollections.observableArrayList(
                     new TableData(" ", " ", " ", " ", " ")
                 );
@@ -326,6 +359,11 @@ public class ApplicationWindow extends Application {
         
         return mainPane;
         
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static void addData(TableData td) {
+        data.add(td);
     }
 
 }

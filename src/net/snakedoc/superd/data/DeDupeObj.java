@@ -14,9 +14,27 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.data;
 
 public class DeDupeObj {
-	String filepath = "";
-	String filehash = "";
+	private String filepath = "";
+	private String filehash = "";
+	
+	//setters
+	public void setFilePath(String filepath) {
+	    this.filepath = filepath;
+	}
+	
+	public void setFileHash(String filehash) {
+	    this.filehash = filehash;
+	}
+	
+	// getters
+	public String getFilePath() {
+	    return this.filepath;
+	}
+	
+	public String getFileHash() {
+	    return this.filehash;
+	}
 }

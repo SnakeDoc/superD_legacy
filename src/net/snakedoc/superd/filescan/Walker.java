@@ -14,11 +14,14 @@
 *  limitations under the License.                                             *
 *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.filescan;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.io.Hasher;
 import net.snakedoc.jutils.io.HasherException;
+import net.snakedoc.superd.data.DedupeSQL;
+import net.snakedoc.superd.launcher.DedupeR;
+
 import org.apache.log4j.Logger;
 
 import java.io.File;

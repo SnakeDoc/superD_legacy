@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.launcher;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -26,7 +26,10 @@ import org.apache.log4j.Logger;
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.timer.MilliTimer;
-import net.snakedoc.jutils.database.H2;
+import net.snakedoc.superd.Notice;
+import net.snakedoc.superd.data.Database;
+import net.snakedoc.superd.dedupe.CheckDupes;
+import net.snakedoc.superd.filescan.Walker;
 
 public class DedupeR {
 
@@ -34,11 +37,30 @@ public class DedupeR {
                                              // Has the potential to directly impact performance.
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
-    
 
 	public static void main (String[] args) {
+        /**
+         * Initialize Database & Open Connection
+         */
+        try {
+            Database.getInstance().openConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
 		DedupeR d = new DedupeR();
 		d.driver(args);
+
+        /**
+         * Close Database Connection
+         */
+        try {
+            Database.getInstance().closeConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 	}
 
 	
@@ -52,6 +74,7 @@ public class DedupeR {
         timer.startTimer();
         
         // get instance of other helper objects
+        //@ToDo: The Config object can be static. No need to instantiate.
         Config config = new Config("props/superD.properties");
         config.loadConfig("props/log4j.properties");
         log.info("\n\n");
@@ -59,39 +82,22 @@ public class DedupeR {
         
         System.out.println(notice.get_superD_ascii());
 
-        //CREATE DATABASE
-        H2 db = null;
-        try {   // TODO get rid of this try/catch -- it covers the entire method 
-                // and swallows everything that does not catch. not good...
-            db = Database.getInstance();
-            
-            //Create CHECKDUPES OBJ
-
+        /**
+         * Load Database Tables
+         */
+        try {
             CheckDupes check = new CheckDupes();
-
-            //CONNECT TO DATABASE
-            try {
-                db.openConnection();
-            } catch (ClassNotFoundException | SQLException e) {
-                log.fatal("Failed to open database connection! Check config file!", e);
-            }
-
-            //LOAD DATABASE TABLES
             Schema s = new Schema();
             String sqlSchema = s.getSchema();
-            PreparedStatement psSchema = db.getConnection().prepareStatement(sqlSchema);
+            PreparedStatement psSchema = Database.getInstance().getConnection().prepareStatement(sqlSchema);
             try {
-                log.info("Running schema update on db: " + db.getDbPath());
+                log.info("Running schema update on db: " + Database.getInstance().getDbPath());
                 psSchema.execute();
                 log.info("Schema update complete!");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            try {
-                db.closeConnection();
-            } catch (SQLException e) {
-                log.warn("Failed to close database connection!", e);
-            }
+
             if (args.length<1){
                 Scanner in = new Scanner(System.in);
                 System.out.println("Would you like to read from prop file or enter options now?");
@@ -101,8 +107,8 @@ public class DedupeR {
                 if (choice == 1){
                     readSetup();
                 }
+                in.close(); // close resource
             }
-
 
             //Run Setup() to do main logic, make calls to Walk()
             setup();
@@ -116,8 +122,7 @@ public class DedupeR {
             e.printStackTrace();
         }
 	}
-	
-	
+
 	public static void setup() {
 		//CREATE WALKER OBJECT
         Walker walker = new Walker(BUFFER);
@@ -129,9 +134,9 @@ public class DedupeR {
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String dil = config.getConfig("ROOT_DIL");
+            String del = config.getConfig("ROOT_DEL");
             String rootDirList = config.getConfig("ROOT");
-            List<String> rootDirListArr = Arrays.asList(rootDirList.split(dil));
+            List<String> rootDirListArr = Arrays.asList(rootDirList.split(del));
 
             for (int i=0; i < rootDirListArr.size(); i++){
                 rootDirs.add(new File(rootDirListArr.get(i)));
@@ -175,13 +180,13 @@ public class DedupeR {
             input = in.nextLine();
             config.setConfig("HASH_ALGO", input, false);
 
-            //prompt for ROOT_DIL
+            //prompt for ROOT_DEL
             System.out.println("Please enter a delimiter for root paths");
             System.out.println("Try to use something that won't appear in the path");
             System.out.println("We recommend ;;");
             System.out.print("Enter choice: ");
             input = in.nextLine();
-            config.setConfig("ROOT_DIL", input, false);
+            config.setConfig("ROOT_DEL", input, false);
 
             //PROMPT FOR DIRECTORIES
             System.out.println("Please enter all directories you would like scanned on one line separated by " + input);
