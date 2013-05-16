@@ -21,7 +21,7 @@ public class Notice {
 
     private String superD_ascii = "                                                                                \n" +   // TODO: increase font size of logo
                                   "                                                     ___                        \n" +   // do not remove the extra backslashes,
-                                  "                          ___ _   _ _ __   ___ _ __ /   \\                      \n" +   //  they are needed
+                                  "                          ___ _   _ _ __   ___ _ __ /   \\                      \n" +   // they are needed
                                   "                         / __| | | | '_ \\ / _ \\ '_// /\\ /                    \n" +
                                   "                         \\__ \\ |_| | |_) |  __/ | / /_//                      \n" +
                                   "                         |___/\\__,_| .__/ \\___|_|/___,'                       \n" +
