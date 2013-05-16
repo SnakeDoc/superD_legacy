@@ -14,7 +14,7 @@
  *  limitations under the License.                                             *
  *******************************************************************************/
 
-package net.snakedoc.superd;
+package net.snakedoc.superd.data;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -23,34 +23,21 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
-import net.snakedoc.jutils.ConfigException;
-import net.snakedoc.jutils.database.H2;
 
 public class DedupeSQL {
     
     private final Logger log = Logger.getLogger(DedupeSQL.class);
     Config cfg = new Config("props/superD.properties");
-    H2 db = null;
 
     public DedupeSQL(){
         cfg.loadConfig("props/log4j.properties");
-        try {
-            db = Database.getInstance();
-        } catch (ConfigException e2) {
-            log.fatal("Failed to read config file!", e2);
-        }
-        try {
-            db.openConnection();
-        } catch (ClassNotFoundException | SQLException e1) {
-            log.fatal("Failed to open database connection!", e1);
-        }
     }
 
 	public void writeRecord(String file, String hash) {
 		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ? , ?)";
 		PreparedStatement psInsert = null;
 		try {
-			psInsert = db.getConnection().prepareStatement(sqlInsert);
+			psInsert = Database.getInstance().getConnection().prepareStatement(sqlInsert);
 		} catch (SQLException e) {
 			log.error("Failed to set databse query!", e);
 		}

@@ -1,0 +1,64 @@
+#Wed May 15 15:50:29 PST 2013
+##############################
+##############################
+#          BEGIN             #
+#    superD Configuration    #
+##############################
+# SuperD Configuration file. Copy this file to superD.properties
+# and complete environment configuration.
+##############################
+VERSION = 0.1.0
+##############################
+# Hash Algorithm
+#
+# If left blank, must be passed in from cmd line flag such as -SHA-256
+#
+# Options:
+# MD2, MD5, SHA-1, SHA-256,SHA-384, SHA-512
+##############################
+HASH_ALGO=SHA-512
+##############################
+# Root Delimiter
+#
+# Represents the delimiter separating multiple root directories in Root
+#
+# Note:    Use a delimiter pattern that won't be found in the file path
+# Example: ROOT_DEL = ;;
+##############################
+ROOT_DEL=;;
+##############################
+# Specify ROOT directory
+#
+# Examples:
+# Linux and Mac:    /path/to/directory
+#                   /mount/point
+#
+# Windows:  C:\\
+#           C:\\path\\to\\directory
+##############################
+ROOT=
+##############################
+# Generally leave the db config alone
+#
+# dbURL format:
+#
+# Linux and Mac:
+# dbURL=/path/to/db/file
+#
+# Windows:
+# dbURL=C:\\path\\to\\db\\file
+##############################
+# Generally leave these properties as-is
+# The password for the db does not matter, but
+# is required. 
+# TODO: Feature Request - Add ability for user to
+#        set db password from GUI in case they
+#        prefer that level of data security.
+##############################
+H2_dbURL=db\\superD
+H2_dbUser=superD
+H2_dbPass=3xtr3m3
+##############################
+#            END             #
+#    superD Configuration    #
+##############################
