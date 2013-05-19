@@ -17,6 +17,7 @@
 package net.snakedoc.superd.filescan;
 
 import net.snakedoc.jutils.Config;
+import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.io.Hasher;
 import net.snakedoc.jutils.io.HasherException;
 import net.snakedoc.superd.data.DedupeSQL;
@@ -33,9 +34,15 @@ public class Walker {
     private final Hasher hasher = new Hasher();
     private final DedupeSQL sql = new DedupeSQL();
     private final Config config = new Config("props/superD.properties");
+    private String hashAlgo = "";
 
     public Walker(int buffer){
         BUFFER = buffer;
+        try {
+            this.hashAlgo = config.getConfig("HASH_ALGO");
+        } catch (ConfigException e) {
+            log.error("Failed to read config!", e);
+        }
     }
 
     public void walk(File path){
@@ -66,20 +73,23 @@ public class Walker {
 
     private void hashFile(File curFile){
         try{
-        String hashAlgo = config.getConfig("HASH_ALGO");
         String file = "";
         String hash = "";
         try {
             file = curFile.getPath();
             log.debug("File: " + file);
-            hash = hasher.getHash(curFile.getPath(), hashAlgo, BUFFER);
+            hash = hasher.getHash(curFile.getPath(), this.getHashAlgo(), BUFFER);
         } catch (IOException | HasherException e1) {
             log.error("Failed to access and/or hash file!", e1);
         }
         sql.writeRecord(file, hash);
         log.debug("\n\t Hash: " + hash);
         }catch( Exception e){
-            log.warn(e.getStackTrace());
+            log.warn("Something went wrong!", e);
         }
+    }
+    
+    private String getHashAlgo() {
+        return this.hashAlgo;
     }
 }
