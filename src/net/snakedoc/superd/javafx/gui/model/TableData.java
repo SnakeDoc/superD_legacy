@@ -1,12 +1,14 @@
 package net.snakedoc.superd.javafx.gui.model;
 
+import javafx.beans.property.SimpleStringProperty;
+
 public class TableData {
     
-    private volatile String fileName;
-    private volatile String directory;
-    private volatile String size;
-    private volatile String hashAlgo;
-    private volatile String fileHash;
+    private SimpleStringProperty fileName;
+    private SimpleStringProperty directory;
+    private SimpleStringProperty size;
+    private SimpleStringProperty hashAlgo;
+    private SimpleStringProperty fileHash;
     
     /**
      * Default Constructor
@@ -25,54 +27,54 @@ public class TableData {
      * @param fileHash File's Hashed Output
      */
     public TableData(String fileName, String directory,
-                String size, String hashAlgo, String fileHash) {
+            String size, String hashAlgo, String fileHash) {
         
-        this.fileName = fileName;
-        this.directory = directory;
-        this.size = size;
-        this.hashAlgo = hashAlgo;
-        this.fileHash = fileHash;
+        this.fileName = new SimpleStringProperty(fileName);
+        this.directory = new SimpleStringProperty(directory);
+        this.size = new SimpleStringProperty(size);
+        this.hashAlgo = new SimpleStringProperty(hashAlgo);
+        this.fileHash = new SimpleStringProperty(fileHash);
         
     }
     
     public String getFileName() {
-        return this.fileName;
+        return this.fileName.get();
     }
     
     public void setFileName(String fileName) {
-        this.fileName = fileName;
+        this.fileName.set(fileName);
     }
     
     public String getDirectory() {
-        return this.directory;
+        return this.directory.get();
     }
     
     public void setDirectory(String directory) {
-        this.directory = directory;
+        this.directory.set(directory);
     }
     
     public String getSize() {
-        return this.size;
+        return this.size.get();
     }
     
     public void setSize(String size) {
-        this.size = size;
+        this.size.set(size);
     }
     
     public String getHashAlgo() {
-        return this.hashAlgo;
+        return this.hashAlgo.get();
     }
     
     public void setHashAlgo(String hashAlgo) {
-        this.hashAlgo = hashAlgo;
+        this.hashAlgo.set(hashAlgo);
     }
     
     public String getFileHash() {
-        return this.fileHash;
+        return this.fileHash.get();
     }
     
     public void setFileHash(String fileHash) {
-        this.fileHash = fileHash;
+        this.fileHash.set(fileHash);
     }
     
 }

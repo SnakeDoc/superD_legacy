@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -46,7 +47,7 @@ public class ApplicationWindow extends Application {
     private Config cfg = new Config("props/superD.properties");
     
     @SuppressWarnings("rawtypes")
-    private static ObservableList data = null;
+    private volatile static ObservableList<TableData> data = FXCollections.observableArrayList();
     
     /**
      * @param args the command line arguments
@@ -327,32 +328,39 @@ public class ApplicationWindow extends Application {
         
         BorderPane mainPane = new BorderPane();
 
-        TableView<String> table = new TableView<String>();
+        TableView table = new TableView();
         table.setMaxWidth(1000);
         table.setEditable(true);
         
         TableColumn fileNameCol = new TableColumn("File Name");
         fileNameCol.setMinWidth(100);
+        fileNameCol.setCellValueFactory(
+                new PropertyValueFactory<TableData, String>("fileName"));
         
         TableColumn directoryCol = new TableColumn("Directory");
         directoryCol.setMinWidth(375);
+        directoryCol.setCellValueFactory(
+                new PropertyValueFactory<TableData, String>("directory"));
         
         TableColumn sizeCol = new TableColumn("Size");
         sizeCol.setMinWidth(50);
+        sizeCol.setCellValueFactory(
+                new PropertyValueFactory<TableData, String>("size"));
         
         TableColumn hashAlgoCol = new TableColumn("Hash Algo");
         hashAlgoCol.setMinWidth(100);
+        hashAlgoCol.setCellValueFactory(
+                new PropertyValueFactory<TableData, String>("hashAlgo"));
         
         TableColumn fileHashCol = new TableColumn("File Hash");
         fileHashCol.setMinWidth(375);
+        fileHashCol.setCellValueFactory(
+                new PropertyValueFactory<TableData, String>("fileHash"));
         
         table.getColumns().addAll(fileNameCol, directoryCol, sizeCol, hashAlgoCol, fileHashCol);
         
         // set some blank data so our table will be visible
-        data = 
-                FXCollections.observableArrayList(
-                    new TableData(" ", " ", " ", " ", " ")
-                );
+        data.add(new TableData("", "", "", "", ""));
         table.setItems(data);
         
         mainPane.setCenter(table);
@@ -361,7 +369,6 @@ public class ApplicationWindow extends Application {
         
     }
     
-    @SuppressWarnings("unchecked")
     public synchronized static void addData(TableData td) {
         data.add(td);
     }
