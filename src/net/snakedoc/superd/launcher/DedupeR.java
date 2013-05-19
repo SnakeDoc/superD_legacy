@@ -68,6 +68,13 @@ public class DedupeR {
 	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
         
+        // Open Database Connection
+        try {
+            Database.getInstance().openConnection();
+        } catch (ClassNotFoundException | SQLException e1) {
+            log.fatal("Failed to open database connection!", e1);
+        }
+        
         Notice notice = new Notice();
         
         // start timer
@@ -121,6 +128,14 @@ public class DedupeR {
         } catch (Exception e) { // TODO get rid of this to narrow try/catch scope for improved exception handling/recovery. log out
             e.printStackTrace();
         }
+        
+        // Close database connection
+        try {
+            Database.getInstance().closeConnection();
+        } catch (SQLException e) {
+            log.warn("Failed to close database connection!", e);
+        }
+        
 	}
 
 	public static void setup() {
