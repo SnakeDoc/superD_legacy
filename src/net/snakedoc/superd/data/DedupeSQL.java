@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
+import net.snakedoc.superd.javafx.gui.ApplicationWindow;
+import net.snakedoc.superd.javafx.gui.model.TableData;
 
 public class DedupeSQL {
     
@@ -48,6 +50,8 @@ public class DedupeSQL {
 			psInsert.setLong(3, (fl.length()));
 			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
 			psInsert.executeUpdate();
+			ApplicationWindow.addData(new TableData(fl.getName(), fl.getAbsoluteFile().toString(), 
+			        (fl.length() + " B"), "SHA-512", hash));
 		} catch (SQLException e) {
 			log.error("Failed to query database!", e);
 		}
