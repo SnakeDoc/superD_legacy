@@ -362,7 +362,7 @@ public class ApplicationWindow extends Application {
     }
     
     @SuppressWarnings("unchecked")
-    public static void addData(TableData td) {
+    public synchronized static void addData(TableData td) {
         data.add(td);
     }
 

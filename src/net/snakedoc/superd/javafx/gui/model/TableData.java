@@ -2,11 +2,11 @@ package net.snakedoc.superd.javafx.gui.model;
 
 public class TableData {
     
-    private String fileName;
-    private String directory;
-    private String size;
-    private String hashAlgo;
-    private String fileHash;
+    private volatile String fileName;
+    private volatile String directory;
+    private volatile String size;
+    private volatile String hashAlgo;
+    private volatile String fileHash;
     
     /**
      * Default Constructor
