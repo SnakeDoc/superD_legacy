@@ -23,6 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -37,9 +38,13 @@ import javafx.stage.Stage;
  */
 public class ApplicationWindow extends Application {
     
-    private static String TOP_STYLE = "-fx-background-color: #336699;";
+    private static final String TOP_STYLE = "-fx-background-color: #679FD2;";
     @SuppressWarnings("unused")
-    private static String CENTER_STYLE = "-fx-background-color: #113B63;";
+    private static final String CENTER_STYLE = "-fx-background-color: #113B63;";
+    private static final String ACTION_BUTTON_STYLE_GO = "-fx-base: #00FF00"; // GREEN
+    private static final String ACTION_BUTTON_STYLE_STOP = "-fx-base: #FF0000"; // RED
+    private static final String ACTION_BUTTON_STYLE_NEXT = "-fx-base: #FFFF00"; // YELLOW
+    private final DropShadow shadow = new DropShadow();
     
     private TextField targetTextField = null;
     private TextField delimiterTextField = null;
@@ -141,14 +146,17 @@ public class ApplicationWindow extends Application {
         rightButtonHBox.setSpacing(7);
         rightButtonHBox.setStyle(TOP_STYLE);
         
-        final Button buttonDedupe = new Button("Dedupe!");
-        buttonDedupe.setPrefSize(100, 70);
-        buttonDedupe.setOnAction(new EventHandler<ActionEvent>() {
+        final Button actionButton = new Button();
+        actionButton.setText("Dedupe!");
+        actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
+        actionButton.setEffect(shadow);
+        actionButton.setPrefSize(100, 70);
+        actionButton.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
             public void handle(ActionEvent event) {
                 
-                buttonDedupe.setDisable(true);
+                actionButton.setDisable(true);
                 
                 final Task<Void> task = new Task<Void>() {
                     @Override
@@ -193,6 +201,7 @@ public class ApplicationWindow extends Application {
         rightButtonVBox.setStyle(TOP_STYLE);
         
         final Button buttonBrowse = new Button("Browse");
+        buttonBrowse.setEffect(shadow);
         buttonBrowse.setPrefSize(100, 30);
         
         buttonBrowse.setOnAction(new EventHandler<ActionEvent>() {
@@ -219,6 +228,7 @@ public class ApplicationWindow extends Application {
         });
         
         final Button buttonAddBrowse = new Button("Add");
+        buttonAddBrowse.setEffect(shadow);
         buttonAddBrowse.setPrefSize(100, 30);
         
         buttonAddBrowse.setOnAction(new EventHandler<ActionEvent>() {
@@ -247,7 +257,7 @@ public class ApplicationWindow extends Application {
         
         rightButtonVBox.getChildren().addAll(buttonBrowse, buttonAddBrowse);
         
-        rightButtonHBox.getChildren().addAll(rightButtonVBox, buttonDedupe);
+        rightButtonHBox.getChildren().addAll(rightButtonVBox, actionButton);
         
         // Create centered Text Field
         HBox centerTextHBox = new HBox();
@@ -266,9 +276,11 @@ public class ApplicationWindow extends Application {
         delimiterHBox.setStyle(TOP_STYLE);
         
         this.targetTextField = new TextField();
+        this.targetTextField.setEffect(shadow);
         this.targetTextField.setMinWidth(700);
         
         this.delimiterTextField = new TextField();
+        this.delimiterTextField.setEffect(shadow);
         this.delimiterTextField.setMinWidth(25);
         this.delimiterTextField.setMaxWidth(25);
         try {
@@ -279,6 +291,7 @@ public class ApplicationWindow extends Application {
         }
         
         final Button buttonDelimiter = new Button("Set Delimiter");
+        buttonDelimiter.setEffect(shadow);
  /*       buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
@@ -308,8 +321,10 @@ public class ApplicationWindow extends Application {
         leftLabelVBox.setStyle(TOP_STYLE);
         
         Label labelBrowse = new Label("Target:");
+        labelBrowse.setEffect(shadow);
         
         Label labelDelimiter = new Label("Delimiter:");
+        labelDelimiter.setEffect(shadow);
         
         leftLabelVBox.getChildren().addAll(labelBrowse, labelDelimiter);
         
@@ -362,7 +377,7 @@ public class ApplicationWindow extends Application {
 
         table.setItems(data);
         
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);//.CONSTRAINED_RESIZE_POLICY);
         
         mainPane.setCenter(table);
         
@@ -375,4 +390,8 @@ public class ApplicationWindow extends Application {
         table.scrollTo(table.getItems().size());
     }
 
+}
+
+class ActionButton {
+    
 }
