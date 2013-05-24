@@ -19,6 +19,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -30,6 +32,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 /**
  * 
@@ -50,6 +53,7 @@ public class ApplicationWindow extends Application {
     private static final String TOP_STYLE = "-fx-background-color: #679FD2;";
     @SuppressWarnings("unused")
     private static final String CENTER_STYLE = "-fx-background-color: #679FD2;";
+    private static final String LABEL_STYLE = "-fx-background-color: #FFC573";
     private final DropShadow shadow = new DropShadow();
     
     private TextField targetTextField = null;
@@ -281,9 +285,11 @@ public class ApplicationWindow extends Application {
         leftLabelVBox.setStyle(TOP_STYLE);
         
         Label labelBrowse = new Label("Target:");
+        labelBrowse.setStyle(LABEL_STYLE);
         labelBrowse.setEffect(shadow);
         
         Label labelDelimiter = new Label("Delimiter:");
+        labelDelimiter.setStyle(LABEL_STYLE);
         labelDelimiter.setEffect(shadow);
         
         leftLabelVBox.getChildren().addAll(labelBrowse, labelDelimiter);
@@ -311,33 +317,68 @@ public class ApplicationWindow extends Application {
         fileNameCol.setMinWidth(125);
         fileNameCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("fileName"));
+        fileNameCol.setCellFactory(
+                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
+            @Override
+            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
+                return new CenteredOverrunTableCell();
+            }
+                });
         
         TableColumn directoryCol = new TableColumn("Directory");
         directoryCol.setMinWidth(375);
         directoryCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("directory"));
+        directoryCol.setCellFactory(
+                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
+            @Override
+            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
+                return new CenteredOverrunTableCell();
+            }
+                });
         
         TableColumn sizeCol = new TableColumn("Size");
         sizeCol.setMinWidth(100);
         sizeCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("size"));
+        sizeCol.setCellFactory(
+                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
+            @Override
+            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
+                return new CenteredOverrunTableCell();
+            }
+                });
         
         TableColumn hashAlgoCol = new TableColumn("Hash Algo");
         hashAlgoCol.setMinWidth(25);
         hashAlgoCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("hashAlgo"));
+        hashAlgoCol.setCellFactory(
+                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
+            @Override
+            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
+                return new CenteredOverrunTableCell();
+            }
+                });
         
         TableColumn fileHashCol = new TableColumn("File Hash");
         fileHashCol.setMinWidth(375);
         fileHashCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("fileHash"));
+        fileHashCol.setCellFactory(
+                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
+            @Override
+            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
+                return new CenteredOverrunTableCell();
+            }
+                });
         
         table.getColumns().addAll(fileNameCol, directoryCol, sizeCol, hashAlgoCol, fileHashCol);
         
 
         table.setItems(data);
         
-        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);//.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
         mainPane.setCenter(table);
         
@@ -350,6 +391,25 @@ public class ApplicationWindow extends Application {
         table.scrollTo(table.getItems().size());
     }
 
+}
+
+class CenteredOverrunTableCell extends TableCell<TableData, String> {
+    public CenteredOverrunTableCell() {
+        this(null);
+    }
+
+    public CenteredOverrunTableCell(String ellipsisString) {
+        super();
+        setTextOverrun(OverrunStyle.CENTER_WORD_ELLIPSIS);
+        if (ellipsisString != null) {
+            setEllipsisString(ellipsisString);
+        }  
+    }
+
+    @Override protected void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
+        setText(item == null ? "" : item);
+    }
 }
 
 class ActionButton {
