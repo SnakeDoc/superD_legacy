@@ -38,12 +38,18 @@ import javafx.stage.Stage;
  */
 public class ApplicationWindow extends Application {
     
+    /**
+     * COLOR SCHEME:
+     * 
+     * FF9500   BF8430  A66100  FFB040  FFC573
+     * 
+     * 0C5DA5   26537C  043A6B  408DD2  679FD2
+     * 
+     */
+    
     private static final String TOP_STYLE = "-fx-background-color: #679FD2;";
     @SuppressWarnings("unused")
-    private static final String CENTER_STYLE = "-fx-background-color: #113B63;";
-    private static final String ACTION_BUTTON_STYLE_GO = "-fx-base: #00FF00"; // GREEN
-    private static final String ACTION_BUTTON_STYLE_STOP = "-fx-base: #FF0000"; // RED
-    private static final String ACTION_BUTTON_STYLE_NEXT = "-fx-base: #FFFF00"; // YELLOW
+    private static final String CENTER_STYLE = "-fx-background-color: #679FD2;";
     private final DropShadow shadow = new DropShadow();
     
     private TextField targetTextField = null;
@@ -146,53 +152,7 @@ public class ApplicationWindow extends Application {
         rightButtonHBox.setSpacing(7);
         rightButtonHBox.setStyle(TOP_STYLE);
         
-        final Button actionButton = new Button();
-        actionButton.setText("Dedupe!");
-        actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
-        actionButton.setEffect(shadow);
-        actionButton.setPrefSize(100, 70);
-        actionButton.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                
-                actionButton.setDisable(true);
-                
-                final Task<Void> task = new Task<Void>() {
-                    @Override
-                    public void run() {
-                        DedupeR deduper = new DedupeR();
-                        String str[] = { "-d" };
-                        deduper.driver(str);
-                    }
-
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                };
-                
-                new Thread(task).start();
-                
-                @SuppressWarnings("unused")
-                final Task<Void> taskUpdateDisplay = new Task<Void>() {
-                    @Override
-                    public void run() {
-                        while (task.isRunning()) {
-                            
-                        }
-                    }
-                    
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                };
-            }
-            
-        });
+        ActionButton actionButton = new ActionButton();
         
         // Setup a VBox for the stacked buttons
         VBox rightButtonVBox = new VBox();
@@ -257,7 +217,7 @@ public class ApplicationWindow extends Application {
         
         rightButtonVBox.getChildren().addAll(buttonBrowse, buttonAddBrowse);
         
-        rightButtonHBox.getChildren().addAll(rightButtonVBox, actionButton);
+        rightButtonHBox.getChildren().addAll(rightButtonVBox, actionButton.getActionButton());
         
         // Create centered Text Field
         HBox centerTextHBox = new HBox();
@@ -394,4 +354,136 @@ public class ApplicationWindow extends Application {
 
 class ActionButton {
     
+    private final String ACTION_BUTTON_STYLE_GO = "-fx-base: #00FF00"; // GREEN
+    private final String ACTION_BUTTON_STYLE_STOP = "-fx-base: #FF0000"; // RED
+    private final String ACTION_BUTTON_STYLE_NEXT = "-fx-base: #FFFF00"; // YELLOW
+    private final DropShadow shadow = new DropShadow();
+    
+    private Button actionButton;
+    
+    public Button getActionButton() {
+     
+        actionButton = new Button();
+        setActionButtonState(1);
+        actionButton.setEffect(this.shadow);
+        actionButton.setPrefSize(100, 70);
+        actionButton.setOnAction(new EventHandler<ActionEvent>() {
+            
+            @Override
+            public void handle(ActionEvent event) {
+                
+                setActionButtonState(3);
+                
+                final Task<Void> task = new Task<Void>() {
+                    @Override
+                    public void run() {
+                        DedupeR deduper = new DedupeR();
+                        String str[] = { "-d" };
+                        deduper.driver(str);
+                    }
+
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                };
+                
+                new Thread(task).start();
+                
+                @SuppressWarnings("unused")
+                final Task<Void> taskUpdateDisplay = new Task<Void>() {
+                    @Override
+                    public void run() {
+                        while (task.isRunning()) {
+                            
+                        }
+                    }
+                    
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+                };
+            }
+            
+        });
+        return actionButton;
+    }
+    
+    private void setActionButtonState(final int op) {
+        
+        class ActionButtonState {
+            
+            private final int BLANK  =  0;
+            private final int DEDUPE =  1;
+            private final int NEXT   =  2;
+            private final int STOP   =  3;
+            private final int ERROR  = -1;
+            
+            private void validateOp() {
+                
+                switch (op) {
+                
+                case 0:
+                    doBLANK();
+                    break;
+                case 1:
+                    doDEDUPE();
+                    break;
+                case 2:
+                    doNEXT();
+                    break;
+                case 3:
+                    doSTOP();
+                    break;
+                default:
+                    doERROR();
+                    break;
+                
+                }
+                
+            }
+            
+            private void doBLANK() {
+                
+                actionButton.setText("");
+                actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
+                
+            }
+            
+            private void doDEDUPE() {
+                
+                actionButton.setText("Dedupe!");
+                actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
+                
+            }
+            
+            private void doNEXT() {
+                
+                actionButton.setText("Next!");
+                actionButton.setStyle(ACTION_BUTTON_STYLE_NEXT);
+                
+            }
+            
+            private void doSTOP() {
+                
+                actionButton.setText("STOP!");
+                actionButton.setStyle(ACTION_BUTTON_STYLE_STOP);
+                
+            }
+            
+            private void doERROR() {
+                
+                actionButton.setText("ERROR!");
+                actionButton.setStyle(ACTION_BUTTON_STYLE_STOP);
+                
+            }
+            
+        }
+        
+        ActionButtonState acbs = new ActionButtonState();
+        acbs.validateOp();
+    }
 }
