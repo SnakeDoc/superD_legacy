@@ -46,8 +46,9 @@ public class ApplicationWindow extends Application {
     
     private Config cfg = new Config("props/superD.properties");
     
-    @SuppressWarnings("rawtypes")
     private volatile static ObservableList<TableData> data = FXCollections.observableArrayList();
+    @SuppressWarnings("rawtypes")
+    private static TableView table = new TableView();
     
     /**
      * @param args the command line arguments
@@ -328,12 +329,11 @@ public class ApplicationWindow extends Application {
         
         BorderPane mainPane = new BorderPane();
 
-        TableView table = new TableView();
-        table.setMaxWidth(1000);
+        table.setMinWidth(1000);
         table.setEditable(true);
         
         TableColumn fileNameCol = new TableColumn("File Name");
-        fileNameCol.setMinWidth(100);
+        fileNameCol.setMinWidth(125);
         fileNameCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("fileName"));
         
@@ -343,12 +343,12 @@ public class ApplicationWindow extends Application {
                 new PropertyValueFactory<TableData, String>("directory"));
         
         TableColumn sizeCol = new TableColumn("Size");
-        sizeCol.setMinWidth(50);
+        sizeCol.setMinWidth(100);
         sizeCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("size"));
         
         TableColumn hashAlgoCol = new TableColumn("Hash Algo");
-        hashAlgoCol.setMinWidth(100);
+        hashAlgoCol.setMinWidth(25);
         hashAlgoCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("hashAlgo"));
         
@@ -359,9 +359,10 @@ public class ApplicationWindow extends Application {
         
         table.getColumns().addAll(fileNameCol, directoryCol, sizeCol, hashAlgoCol, fileHashCol);
         
-        // set some blank data so our table will be visible
-        data.add(new TableData("", "", "", "", ""));
+
         table.setItems(data);
+        
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
         mainPane.setCenter(table);
         
@@ -371,6 +372,7 @@ public class ApplicationWindow extends Application {
     
     public synchronized static void addData(TableData td) {
         data.add(td);
+        table.scrollTo(table.getItems().size());
     }
 
 }

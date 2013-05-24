@@ -20,9 +20,12 @@ import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javafx.application.Platform;
+
 import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
+import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.superd.javafx.gui.ApplicationWindow;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
@@ -30,12 +33,15 @@ public class DedupeSQL {
     
     private final Logger log = Logger.getLogger(DedupeSQL.class);
     Config cfg = new Config("props/superD.properties");
+    private File fl;
+    private String hash;
 
     public DedupeSQL(){
         cfg.loadConfig("props/log4j.properties");
     }
 
 	public void writeRecord(String file, String hash) {
+	    this.setHash(hash);
 		String sqlInsert = "INSERT INTO files (file_path, file_hash, file_size) VALUES (? , ? , ?)";
 		PreparedStatement psInsert = null;
 		try {
@@ -43,17 +49,34 @@ public class DedupeSQL {
 		} catch (SQLException e) {
 			log.error("Failed to set databse query!", e);
 		}
-		File fl = new File(file);
+		this.fl = new File(file);
 		try {
 			psInsert.setString(1, file);
-			psInsert.setString(2, hash);
+			psInsert.setString(2, this.hash);
 			psInsert.setLong(3, (fl.length()));
-			log.debug("Writing record to database! \n File: " + file + " | Hash: " + hash);
+			log.debug("Writing record to database! \n File: " + file + " | Hash: " + this.hash);
 			psInsert.executeUpdate();
-			ApplicationWindow.addData(new TableData(fl.getName(), fl.getAbsoluteFile().toString(), 
-			        (fl.length() + " B"), "SHA-512", hash));
+			Platform.runLater(new Runnable() {
+			    @Override
+			    public void run() {
+			        try {
+                        ApplicationWindow.addData(new TableData(fl.getName(), fl.getAbsoluteFile().toString(), 
+                                (fl.length() + " B"), cfg.getConfig("HASH_ALGO"), getHash()));
+                    } catch (ConfigException e) {
+                        log.error("Failed to read config!", e);
+                    }
+			    }
+			});
 		} catch (SQLException e) {
 			log.error("Failed to query database!", e);
 		}
+	}
+	
+	private void setHash(String hash) {
+	    this.hash = hash;
+	}
+	
+	private String getHash() {
+	    return this.hash;
 	}
 }
