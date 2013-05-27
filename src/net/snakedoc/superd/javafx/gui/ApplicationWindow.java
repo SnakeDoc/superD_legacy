@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.superd.javafx.gui.controller.ThreadMonitor;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 import net.snakedoc.superd.launcher.DedupeR;
 
@@ -16,6 +17,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -313,7 +315,7 @@ public class ApplicationWindow extends Application {
         table.setMinWidth(1000);
         table.setEditable(true);
         
-        TableColumn fileNameCol = new TableColumn("File Name");
+        TableColumn fileNameCol = new TableColumn("File");
         fileNameCol.setMinWidth(125);
         fileNameCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("fileName"));
@@ -337,8 +339,8 @@ public class ApplicationWindow extends Application {
             }
                 });
         
-        TableColumn sizeCol = new TableColumn("Size");
-        sizeCol.setMinWidth(100);
+        TableColumn sizeCol = new TableColumn("Size (MB)");
+        sizeCol.setMinWidth(45);
         sizeCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("size"));
         sizeCol.setCellFactory(
@@ -349,8 +351,8 @@ public class ApplicationWindow extends Application {
             }
                 });
         
-        TableColumn hashAlgoCol = new TableColumn("Hash Algo");
-        hashAlgoCol.setMinWidth(25);
+/*        TableColumn hashAlgoCol = new TableColumn("Hash Algo");
+        hashAlgoCol.setMinWidth(80);
         hashAlgoCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("hashAlgo"));
         hashAlgoCol.setCellFactory(
@@ -360,8 +362,8 @@ public class ApplicationWindow extends Application {
                 return new CenteredOverrunTableCell();
             }
                 });
-        
-        TableColumn fileHashCol = new TableColumn("File Hash");
+*/        
+        TableColumn fileHashCol = new TableColumn("Hash");
         fileHashCol.setMinWidth(375);
         fileHashCol.setCellValueFactory(
                 new PropertyValueFactory<TableData, String>("fileHash"));
@@ -373,7 +375,7 @@ public class ApplicationWindow extends Application {
             }
                 });
         
-        table.getColumns().addAll(fileNameCol, directoryCol, sizeCol, hashAlgoCol, fileHashCol);
+        table.getColumns().addAll(fileNameCol, sizeCol, directoryCol, fileHashCol);
         
 
         table.setItems(data);
@@ -396,6 +398,7 @@ public class ApplicationWindow extends Application {
 class CenteredOverrunTableCell extends TableCell<TableData, String> {
     public CenteredOverrunTableCell() {
         this(null);
+        this.setAlignment(Pos.CENTER);
     }
 
     public CenteredOverrunTableCell(String ellipsisString) {
@@ -419,6 +422,14 @@ class ActionButton {
     private final String ACTION_BUTTON_STYLE_NEXT = "-fx-base: #FFFF00"; // YELLOW
     private final DropShadow shadow = new DropShadow();
     
+    private final int BLANK  =  0;
+    private final int DEDUPE =  1;
+    private final int NEXT   =  2;
+    private final int STOP   =  3;
+    private final int ERROR  = -1;
+    
+    private int buttonState = 0;
+    
     private Button actionButton;
     
     public Button getActionButton() {
@@ -432,70 +443,68 @@ class ActionButton {
             @Override
             public void handle(ActionEvent event) {
                 
-                setActionButtonState(3);
+                operateButton();
                 
-                final Task<Void> task = new Task<Void>() {
-                    @Override
-                    public void run() {
-                        DedupeR deduper = new DedupeR();
-                        String str[] = { "-d" };
-                        deduper.driver(str);
-                    }
-
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                };
                 
-                new Thread(task).start();
-                
-                @SuppressWarnings("unused")
-                final Task<Void> taskUpdateDisplay = new Task<Void>() {
-                    @Override
-                    public void run() {
-                        while (task.isRunning()) {
-                            
-                        }
-                    }
-                    
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO Auto-generated method stub
-                        return null;
-                    }
-                };
             }
             
         });
         return actionButton;
     }
     
+    private void operateButton() {
+        
+        switch (this.buttonState) {
+        
+        case BLANK:
+            // do nothing
+            setActionButtonState(BLANK);
+            break;
+        case DEDUPE:
+            setActionButtonState(STOP);
+            ThreadMonitor.getInstance().startDedupeTask();
+            break;
+        case NEXT:
+            //TODO take to next page
+            setActionButtonState(NEXT);
+            break;
+        case STOP:
+            ThreadMonitor.getInstance().stopDedupeTask();
+            setActionButtonState(DEDUPE);
+            break;
+        default:
+            // do nothing
+            setActionButtonState(ERROR);
+            break;
+        
+        }
+        
+    }
+    
+    private void setButtonState(int state) {
+        
+        this.buttonState = state;
+        
+    }
+    
     private void setActionButtonState(final int op) {
         
         class ActionButtonState {
-            
-            private final int BLANK  =  0;
-            private final int DEDUPE =  1;
-            private final int NEXT   =  2;
-            private final int STOP   =  3;
-            private final int ERROR  = -1;
             
             private void validateOp() {
                 
                 switch (op) {
                 
-                case 0:
+                case BLANK:
                     doBLANK();
                     break;
-                case 1:
+                case DEDUPE:
                     doDEDUPE();
                     break;
-                case 2:
+                case NEXT:
                     doNEXT();
                     break;
-                case 3:
+                case STOP:
                     doSTOP();
                     break;
                 default:
@@ -510,6 +519,7 @@ class ActionButton {
                 
                 actionButton.setText("");
                 actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
+                setButtonState(BLANK);
                 
             }
             
@@ -517,6 +527,7 @@ class ActionButton {
                 
                 actionButton.setText("Dedupe!");
                 actionButton.setStyle(ACTION_BUTTON_STYLE_GO);
+                setButtonState(DEDUPE);
                 
             }
             
@@ -524,6 +535,7 @@ class ActionButton {
                 
                 actionButton.setText("Next!");
                 actionButton.setStyle(ACTION_BUTTON_STYLE_NEXT);
+                setButtonState(NEXT);
                 
             }
             
@@ -531,6 +543,7 @@ class ActionButton {
                 
                 actionButton.setText("STOP!");
                 actionButton.setStyle(ACTION_BUTTON_STYLE_STOP);
+                setButtonState(STOP);
                 
             }
             
@@ -538,6 +551,7 @@ class ActionButton {
                 
                 actionButton.setText("ERROR!");
                 actionButton.setStyle(ACTION_BUTTON_STYLE_STOP);
+                setButtonState(ERROR);
                 
             }
             

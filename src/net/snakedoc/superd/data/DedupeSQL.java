@@ -17,6 +17,7 @@
 package net.snakedoc.superd.data;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -26,7 +27,9 @@ import org.apache.log4j.Logger;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.superd.filescan.Walker;
 import net.snakedoc.superd.javafx.gui.ApplicationWindow;
+import net.snakedoc.superd.javafx.gui.controller.ThreadMonitor;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
 public class DedupeSQL {
@@ -61,12 +64,17 @@ public class DedupeSQL {
 			    public void run() {
 			        try {
                         ApplicationWindow.addData(new TableData(fl.getName(), fl.getAbsoluteFile().toString(), 
-                                (fl.length() + " B"), cfg.getConfig("HASH_ALGO"), getHash()));
+                                ((new BigDecimal(fl.length()).divide(new BigDecimal(1024))).divide(
+                                            new BigDecimal(1024))).setScale(4, BigDecimal.ROUND_HALF_UP).toString(), 
+                                        cfg.getConfig("HASH_ALGO"), getHash()));
                     } catch (ConfigException e) {
                         log.error("Failed to read config!", e);
                     }
 			    }
 			});
+			if (Thread.currentThread().isInterrupted()) {
+                    Walker.setTerminate(true);
+			}
 		} catch (SQLException e) {
 			log.error("Failed to query database!", e);
 		}

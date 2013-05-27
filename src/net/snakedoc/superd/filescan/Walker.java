@@ -35,6 +35,8 @@ public class Walker {
     private final DedupeSQL sql = new DedupeSQL();
     private final Config config = new Config("props/superD.properties");
     private String hashAlgo = "";
+    
+    private static boolean terminate = false;
 
     public Walker(int buffer){
         BUFFER = buffer;
@@ -44,21 +46,33 @@ public class Walker {
             log.error("Failed to read config!", e);
         }
     }
+    
+    public static void setTerminate(boolean bol) {
+        terminate = bol;
+    }
+    
+    public static boolean getTerminate() {
+        return terminate;
+    }
 
     public void walk(File path){
         File[] contents = path.listFiles();
 
         for (File curFile : contents){
-            try{
-                if (isValidDirectory(curFile)){
-                    walk(curFile);
-                } else if (isValidFile(curFile)){
-                    hashFile(curFile);
+            if (! Walker.getTerminate()) { 
+                try{
+                    if (isValidDirectory(curFile)){
+                        walk(curFile);
+                    } else if (isValidFile(curFile)){
+                        hashFile(curFile);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to access file!", e);
+                    log.debug("path: " + curFile.getPath() +
+                            "  |  pathcalled: " + path.getPath());
                 }
-            } catch (Exception e) {
-                log.warn("Failed to access file!", e);
-                log.debug("path: " + curFile.getPath() +
-                        "  |  pathcalled: " + path.getPath());
+            } else {
+                break;
             }
         }
     }
