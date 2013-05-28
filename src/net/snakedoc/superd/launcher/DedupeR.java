@@ -30,6 +30,7 @@ import net.snakedoc.superd.Notice;
 import net.snakedoc.superd.data.Database;
 import net.snakedoc.superd.dedupe.CheckDupes;
 import net.snakedoc.superd.filescan.Walker;
+import net.snakedoc.superd.javafx.gui.ApplicationWindow;
 
 public class DedupeR {
 
@@ -67,6 +68,8 @@ public class DedupeR {
 	public void driver(String[] args) {
 	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
+        
+        ApplicationWindow.clearData();
         
         // Open Database Connection
         try {
@@ -145,7 +148,7 @@ public class DedupeR {
 	    Config config = new Config("props/superD.properties");
 	    
         //list of directories to scan
-		ArrayList<File> rootDirs = new ArrayList<File>(1);
+	    List<File> rootDirs = new ArrayList<File>();
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {

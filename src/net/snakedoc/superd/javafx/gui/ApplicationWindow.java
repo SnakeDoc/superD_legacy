@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
 import net.snakedoc.superd.javafx.gui.controller.ThreadMonitor;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 import net.snakedoc.superd.launcher.DedupeR;
@@ -392,6 +393,10 @@ public class ApplicationWindow extends Application {
         data.add(td);
         table.scrollTo(table.getItems().size());
     }
+    
+    public synchronized static void clearData() {
+        data.clear();
+    }
 
 }
 
@@ -421,6 +426,8 @@ class ActionButton {
     private final String ACTION_BUTTON_STYLE_STOP = "-fx-base: #FF0000"; // RED
     private final String ACTION_BUTTON_STYLE_NEXT = "-fx-base: #FFFF00"; // YELLOW
     private final DropShadow shadow = new DropShadow();
+    
+    private ThreadDedupe threadDedupe = new ThreadDedupe();
     
     private final int BLANK  =  0;
     private final int DEDUPE =  1;
@@ -461,15 +468,16 @@ class ActionButton {
             setActionButtonState(BLANK);
             break;
         case DEDUPE:
+            threadDedupe.setNewThread();
+            threadDedupe.startDedupeTask();
             setActionButtonState(STOP);
-            ThreadMonitor.getInstance().startDedupeTask();
             break;
         case NEXT:
             //TODO take to next page
             setActionButtonState(NEXT);
             break;
         case STOP:
-            ThreadMonitor.getInstance().stopDedupeTask();
+            threadDedupe.stopDedupeTask();
             setActionButtonState(DEDUPE);
             break;
         default:
