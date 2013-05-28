@@ -62,7 +62,7 @@ public class DedupeSQL {
 			    @Override
 			    public void run() {
 			        try {
-                        ApplicationWindow.addData(new TableData(fl.getName(), fl.getAbsoluteFile().toString(), 
+                        ApplicationWindow.addData(new TableData(fl.getName(), (fl.getAbsoluteFile().toString().split(fl.getName())[0]), 
                                 ((new BigDecimal(fl.length()).divide(new BigDecimal(1024))).divide(
                                             new BigDecimal(1024))).setScale(4, BigDecimal.ROUND_HALF_UP).toString(), 
                                         cfg.getConfig("HASH_ALGO"), getHash()));

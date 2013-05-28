@@ -1,3 +1,19 @@
+/*******************************************************************************
+ *  Copyright 2013 Jason Sipula                                                *
+ *                                                                             *
+ *  Licensed under the Apache License, Version 2.0 (the "License");            *
+ *  you may not use this file except in compliance with the License.           *
+ *  You may obtain a copy of the License at                                    *
+ *                                                                             *
+ *      http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                             *
+ *  Unless required by applicable law or agreed to in writing, software        *
+ *  distributed under the License is distributed on an "AS IS" BASIS,          *
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ *  See the License for the specific language governing permissions and        *
+ *  limitations under the License.                                             *
+ *******************************************************************************/
+
 package net.snakedoc.superd.javafx.gui;
 
 import java.io.File;
@@ -10,6 +26,9 @@ import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,6 +39,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -56,8 +76,9 @@ public class ApplicationWindow extends Application {
     private static final String LABEL_STYLE = "-fx-background-color: #FFC573";
     private final DropShadow shadow = new DropShadow();
     
-    private TextField targetTextField = null;
-    private TextField delimiterTextField = null;
+    private static TextField targetTextField = null;
+    private static TextField delimiterTextField = null;
+    private SimpleStringProperty hashAlgo = null;
     
     private Config cfg = new Config("props/superD.properties");
     
@@ -107,34 +128,35 @@ public class ApplicationWindow extends Application {
         
     }
     
-    public String getTargetTextField() {
-        if (this.targetTextField != null) {
-            return this.escapeDirs(this.targetTextField.getText());
+    public static String getTargetTextField() {
+        if (targetTextField != null) {
+            return targetTextField.getText();
         } else {
             return "";
         }
     }
     
-    public void setTargetTextField(String targetTextField) {
-        if (this.targetTextField != null) {
-            this.targetTextField.setText(targetTextField);
+    public static void setTargetTextField(String t) {
+        if (targetTextField != null) {
+            targetTextField.setText(t);
         }
     }
     
-    public String getDelimiterTextField() {
-        if (this.delimiterTextField != null) {
-            return this.escapeDirs(this.delimiterTextField.getText());
+    public static String getDelimiterTextField() {
+        if (delimiterTextField != null) {
+            return delimiterTextField.getText();
         } else {
             return "";
         }
     }
     
-    public void setDelimiterTextField(String delimiterTextField) {
-        if (this.delimiterTextField != null) {
-            this.delimiterTextField.setText(delimiterTextField);
+    public static void setDelimiterTextField(String d) {
+        if (delimiterTextField != null) {
+            delimiterTextField.setText(d);
         }
     }
     
+    @SuppressWarnings("unused")
     private String escapeDirs(String raw) {
         System.out.println("escape");
         return raw.replace("\\", "/");
@@ -211,7 +233,7 @@ public class ApplicationWindow extends Application {
                 File file = directoryChooser.showDialog(dialog);
                 
                 if (!(targetTextField.getText().equalsIgnoreCase(""))) {
-                    targetTextField.appendText(";;" + file.getAbsolutePath());
+                    targetTextField.appendText(delimiterTextField + file.getAbsolutePath());
                 } else {
                     targetTextField.setText(file.getAbsolutePath());
                 }
@@ -239,16 +261,21 @@ public class ApplicationWindow extends Application {
         delimiterHBox.setSpacing(7);
         delimiterHBox.setStyle(TOP_STYLE);
         
-        this.targetTextField = new TextField();
-        this.targetTextField.setEffect(shadow);
-        this.targetTextField.setMinWidth(700);
+        targetTextField = new TextField();
+        targetTextField.setEffect(shadow);
+        targetTextField.setMinWidth(700);
         
-        this.delimiterTextField = new TextField();
-        this.delimiterTextField.setEffect(shadow);
-        this.delimiterTextField.setMinWidth(25);
-        this.delimiterTextField.setMaxWidth(25);
+        delimiterTextField = new TextField();
+        delimiterTextField.setEffect(shadow);
+        delimiterTextField.setMinWidth(25);
+        delimiterTextField.setMaxWidth(25);
         try {
-            this.delimiterTextField.setText(cfg.getConfig("ROOT_DEL"));
+            String d = cfg.getConfig("ROOT_DEL");
+            if (d.equalsIgnoreCase("") || d.equalsIgnoreCase(null)) {
+                delimiterTextField.setText(";;");
+            } else {
+                delimiterTextField.setText(d);
+            }
         } catch (ConfigException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -256,7 +283,7 @@ public class ApplicationWindow extends Application {
         
         final Button buttonDelimiter = new Button("Set Delimiter");
         buttonDelimiter.setEffect(shadow);
- /*       buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
+        buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
             public void handle(ActionEvent event) {
@@ -266,10 +293,37 @@ public class ApplicationWindow extends Application {
             }
             
         });
-   */     
-        delimiterHBox.getChildren().addAll(this.delimiterTextField, buttonDelimiter);
         
-        centerTextVBox.getChildren().addAll(this.targetTextField, delimiterHBox);
+        final Label labelHashAlgo = new Label("Hash Algorithm : ");
+        labelHashAlgo.setStyle(LABEL_STYLE);
+        
+        final Slider sliderHashAlgo = new Slider();
+        sliderHashAlgo.setMin(0);
+        sliderHashAlgo.setMax(100);
+        sliderHashAlgo.setValue(50);
+        sliderHashAlgo.setShowTickLabels(true);
+        sliderHashAlgo.setShowTickMarks(true);
+        sliderHashAlgo.setMajorTickUnit(50);
+        sliderHashAlgo.setMinorTickCount(5);
+        sliderHashAlgo.setBlockIncrement(10);
+        
+        sliderHashAlgo.valueProperty().addListener(new ChangeListener<Number>() {
+           public void changed (ObservableValue<? extends Number> ov,
+                   Number old_val, Number new_val) {
+               
+           }
+        });
+        
+   //     final Label labelSelectedHashAlgo = new Label(
+    //            new StringBuilder(sliderHashAlgo.getValue())
+                
+       // private validateSlider() {
+            
+        //}
+        
+        delimiterHBox.getChildren().addAll(delimiterTextField, buttonDelimiter, labelHashAlgo, sliderHashAlgo);
+        
+        centerTextVBox.getChildren().addAll(targetTextField, delimiterHBox);
         
         centerTextHBox.getChildren().addAll(centerTextVBox);
         
@@ -284,11 +338,11 @@ public class ApplicationWindow extends Application {
         leftLabelVBox.setSpacing(10);
         leftLabelVBox.setStyle(TOP_STYLE);
         
-        Label labelBrowse = new Label("Target:");
+        Label labelBrowse = new Label("Target :");
         labelBrowse.setStyle(LABEL_STYLE);
         labelBrowse.setEffect(shadow);
         
-        Label labelDelimiter = new Label("Delimiter:");
+        Label labelDelimiter = new Label("Delimiter :");
         labelDelimiter.setStyle(LABEL_STYLE);
         labelDelimiter.setEffect(shadow);
         
@@ -348,19 +402,7 @@ public class ApplicationWindow extends Application {
                 return new CenteredOverrunTableCell();
             }
                 });
-        
-/*        TableColumn hashAlgoCol = new TableColumn("Hash Algo");
-        hashAlgoCol.setMinWidth(80);
-        hashAlgoCol.setCellValueFactory(
-                new PropertyValueFactory<TableData, String>("hashAlgo"));
-        hashAlgoCol.setCellFactory(
-                new Callback<TableColumn<TableData, String>, TableCell<TableData, String>>() {
-            @Override
-            public TableCell<TableData, String> call(TableColumn<TableData, String> p) {
-                return new CenteredOverrunTableCell();
-            }
-                });
-*/        
+              
         TableColumn fileHashCol = new TableColumn("Hash");
         fileHashCol.setMinWidth(375);
         fileHashCol.setCellValueFactory(

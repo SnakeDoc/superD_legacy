@@ -38,6 +38,10 @@ public class DedupeR {
                                              // Has the potential to directly impact performance.
     
     private static final Logger log = Logger.getLogger(DedupeR.class);
+    
+    private String root;
+    private String del;
+    private String hashAlgo;
 
 	public static void main (String[] args) {
         /**
@@ -64,10 +68,48 @@ public class DedupeR {
         }
 	}
 
+	private void setRoot(String root) {
+	    this.root = root;
+	}
 	
-	public void driver(String[] args) {
+	private void setDel(String del) {
+	    this.del = del;
+	}
+	
+	private void setHashAlgo(String hashAlgo) {
+	    this.hashAlgo = hashAlgo;
+	}
+	
+	private String getRoot() {
+	    return this.root;
+	}
+	
+	private String getDel() {
+	    return this.del;
+	}
+	
+	@SuppressWarnings("unused")
+    private String getHashAlgo() {
+	    return this.hashAlgo;
+	}
+	
+	private void validateArgs(String[] args) {
+	    for (int i = 0; i < args.length; i++) {
+	        if (args[i].equalsIgnoreCase("-r")) {
+	            this.setRoot(args[i + 1]);
+	        } else if (args[i].equalsIgnoreCase("-d")) {
+	            this.setDel(args[i + 1]);
+	        } else if (args[i].equalsIgnoreCase("-h")) {
+	            this.setHashAlgo(args[i + 1]);
+	        }
+	    }
+	}
+	
+	public void driver(String ... args) {
 	    // get instance of MilliTimer() for benchmarking
         MilliTimer timer = new MilliTimer();
+        
+        this.validateArgs(args);
         
         ApplicationWindow.clearData();
         
@@ -108,6 +150,8 @@ public class DedupeR {
                 e.printStackTrace();
             }
 
+            
+            
             if (args.length<1){
                 Scanner in = new Scanner(System.in);
                 System.out.println("Would you like to read from prop file or enter options now?");
@@ -141,7 +185,7 @@ public class DedupeR {
         
 	}
 
-	public static void setup() {
+	public void setup() {
 		//CREATE WALKER OBJECT
         Walker walker = new Walker(BUFFER);
 	    // load program properties
@@ -152,9 +196,13 @@ public class DedupeR {
 		
         //Load in all directories to scan from properties file into rootDirs ArrayList
 		try {
-            String del = config.getConfig("ROOT_DEL");
-            String rootDirList = config.getConfig("ROOT");
-            List<String> rootDirListArr = Arrays.asList(rootDirList.split(del));
+            if (this.getDel() == null) {
+                this.setDel(config.getConfig("ROOT_DEL"));
+            }
+            if (this.getRoot() == null) {
+                this.setRoot(config.getConfig("ROOT"));
+            }
+            List<String> rootDirListArr = Arrays.asList(this.getRoot().split(this.getDel()));
 
             for (int i=0; i < rootDirListArr.size(); i++){
                 rootDirs.add(new File(rootDirListArr.get(i)));
