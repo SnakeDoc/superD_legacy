@@ -7,14 +7,11 @@ import java.io.FileNotFoundException;
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
-import net.snakedoc.superd.javafx.gui.controller.ThreadMonitor;
 import net.snakedoc.superd.javafx.gui.model.TableData;
-import net.snakedoc.superd.launcher.DedupeR;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;

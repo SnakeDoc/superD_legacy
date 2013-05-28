@@ -29,7 +29,6 @@ import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.superd.filescan.Walker;
 import net.snakedoc.superd.javafx.gui.ApplicationWindow;
-import net.snakedoc.superd.javafx.gui.controller.ThreadMonitor;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
 public class DedupeSQL {
