@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
+import net.snakedoc.jutils.system.SysInfo;
 import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
@@ -78,7 +79,7 @@ public class ApplicationWindow extends Application {
     
     private static TextField targetTextField = null;
     private static TextField delimiterTextField = null;
-    private SimpleStringProperty hashAlgo = null;
+    private static Label hashAlgoLabel = null;
     
     private Config cfg = new Config("props/superD.properties");
     
@@ -305,11 +306,26 @@ public class ApplicationWindow extends Application {
         final BorderPane hashAlgoBorder = new BorderPane();
         hashAlgoBorder.setPadding(new Insets(0));
         
+        final BorderPane hashAlgoBorderCur = new BorderPane();
+        hashAlgoBorderCur.setPadding(new Insets(0));
         
         final Label labelHashAlgo = new Label(" Hash Algorithm ");
         labelHashAlgo.setStyle(LABEL_STYLE);
         
+        final VBox centerHashAlgoVBox = new VBox();
+        centerHashAlgoVBox.setPadding(new Insets(0));
+        centerHashAlgoVBox.setSpacing(0);
+        centerHashAlgoVBox.setStyle(TOP_STYLE);
+        
+        hashAlgoLabel = new Label(" " + this.getRecAlgo() + " ");
+        hashAlgoLabel.setEffect(shadow);
+        hashAlgoLabel.setMinHeight(30);
+        hashAlgoLabel.setStyle(LABEL_STYLE);
+        
         hashAlgoBorder.setCenter(labelHashAlgo);
+        hashAlgoBorderCur.setCenter(hashAlgoLabel);
+        
+       // centerHashAlgoVBox.getChildren().addAll(hashAlgoBorder, hashAlgoBorderCur);
         
         /**
          * File Hashes used:
@@ -328,14 +344,14 @@ public class ApplicationWindow extends Application {
          *                  Recommended for 64 bit Hardware/OS.
          */
         final Slider sliderHashAlgo = new Slider();
-        sliderHashAlgo.setMin(0);
-        sliderHashAlgo.setMax(100);
-        sliderHashAlgo.setValue(75);
-        //sliderHashAlgo.setShowTickLabels(true);
-        //sliderHashAlgo.setShowTickMarks(true);
-        //sliderHashAlgo.setMajorTickUnit(50);
-        //sliderHashAlgo.setMinorTickCount(5);
+        sliderHashAlgo.setMin(10);
+        sliderHashAlgo.setMax(60);
+        sliderHashAlgo.setValue(50);
+        sliderHashAlgo.setMinorTickCount(0);
+        sliderHashAlgo.setMajorTickUnit(10);
         sliderHashAlgo.setBlockIncrement(10);
+        sliderHashAlgo.setShowTickMarks(true);
+        sliderHashAlgo.setSnapToTicks(true);
         
         sliderHashAlgo.valueProperty().addListener(new ChangeListener<Number>() {
            public void changed (ObservableValue<? extends Number> ov,
@@ -344,16 +360,18 @@ public class ApplicationWindow extends Application {
            }
         });
         
-   //     final Label labelSelectedHashAlgo = new Label(
-    //            new StringBuilder(sliderHashAlgo.getValue())
-                
-       // private validateSlider() {
-            
-        //}
+        centerHashAlgoVBox.getChildren().addAll(sliderHashAlgo, hashAlgoBorder);
         
-        hashAlgoVBox.getChildren().addAll(hashAlgoBorder, sliderHashAlgo);
+        HBox sliderHBox = new HBox();
+        sliderHBox.setPadding(new Insets(0));
+        sliderHBox.setSpacing(7);
+        sliderHBox.setStyle(TOP_STYLE);
         
-        delimiterHBox.getChildren().addAll(delimiterTextField, buttonDelimiter, hashAlgoVBox);
+        sliderHBox.getChildren().addAll(hashAlgoBorderCur, centerHashAlgoVBox); //sliderHashAlgo);
+        
+        //hashAlgoVBox.getChildren().addAll(centerHashAlgoVBox, sliderHashAlgo);
+        
+        delimiterHBox.getChildren().addAll(delimiterTextField, buttonDelimiter, sliderHBox);//hashAlgoVBox);
         
         centerTextVBox.getChildren().addAll(targetTextField, delimiterHBox);
         
@@ -366,15 +384,17 @@ public class ApplicationWindow extends Application {
         leftLabelHBox.setStyle(TOP_STYLE);
         
         VBox leftLabelVBox = new VBox();
-        leftLabelVBox.setPadding(new Insets(5, 0, 5, 0));
-        leftLabelVBox.setSpacing(20);
+        leftLabelVBox.setPadding(new Insets(0, 0, 0, 0));
+        leftLabelVBox.setSpacing(5);
         leftLabelVBox.setStyle(TOP_STYLE);
         
         Label labelBrowse = new Label(" Target : ");
+        labelBrowse.setMinHeight(30);
         labelBrowse.setStyle(LABEL_STYLE);
         labelBrowse.setEffect(shadow);
         
         Label labelDelimiter = new Label(" Delimiter : ");
+        labelDelimiter.setMinHeight(30);
         labelDelimiter.setStyle(LABEL_STYLE);
         labelDelimiter.setEffect(shadow);
         
@@ -457,6 +477,25 @@ public class ApplicationWindow extends Application {
         mainPane.setCenter(table);
         
         return mainPane;
+        
+    }
+    
+    /**
+     * Gets the system's recommened hashing algorithm
+     *      based on system cpu and os arch type.
+     * 
+     * @return "SHA-512" for 64 bit systems, and "SHA-256" for all others.
+     */
+    private String getRecAlgo() {
+        
+        // get system info
+        SysInfo sys = new SysInfo();
+        
+        if ((sys.getOSArch().contains("64")) && (sys.getCPUArch().contains("64"))) {
+            return "SHA-512";
+        } else {
+            return "SHA-256";
+        }
         
     }
     
