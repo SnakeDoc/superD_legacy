@@ -263,10 +263,12 @@ public class ApplicationWindow extends Application {
         
         targetTextField = new TextField();
         targetTextField.setEffect(shadow);
+        targetTextField.setMinHeight(30);
         targetTextField.setMinWidth(700);
         
         delimiterTextField = new TextField();
         delimiterTextField.setEffect(shadow);
+        delimiterTextField.setMinHeight(30);
         delimiterTextField.setMinWidth(25);
         delimiterTextField.setMaxWidth(25);
         try {
@@ -283,6 +285,7 @@ public class ApplicationWindow extends Application {
         
         final Button buttonDelimiter = new Button("Set Delimiter");
         buttonDelimiter.setEffect(shadow);
+        buttonDelimiter.setPrefSize(100, 30);
         buttonDelimiter.setOnAction(new EventHandler<ActionEvent>() {
             
             @Override
@@ -294,17 +297,44 @@ public class ApplicationWindow extends Application {
             
         });
         
-        final Label labelHashAlgo = new Label("Hash Algorithm : ");
+        final VBox hashAlgoVBox = new VBox();
+        hashAlgoVBox.setPadding(new Insets(0));
+        hashAlgoVBox.setSpacing(7);
+        hashAlgoVBox.setStyle(TOP_STYLE);
+        
+        final BorderPane hashAlgoBorder = new BorderPane();
+        hashAlgoBorder.setPadding(new Insets(0));
+        
+        
+        final Label labelHashAlgo = new Label(" Hash Algorithm ");
         labelHashAlgo.setStyle(LABEL_STYLE);
         
+        hashAlgoBorder.setCenter(labelHashAlgo);
+        
+        /**
+         * File Hashes used:
+         * MD2     - Fastest, but least secure/reliable. Has well known methods of forcibly  
+         *                  causing hash collisions and is generally not good for highly secure 
+         *                  or important data.
+         * MD5     - Still quite fast, and more secure/reliable than MD2, but has 
+         *                  well known methods of forcibly causing hash collisions 
+         *                  and is generally not good for highly secure or important data.
+         * SHA-1   - Quite fast while still decently secure/reliable. 
+         * SHA-256 - Decently fast while still being quite secure/reliable. Recommended for 32 bit Hardware/OS.
+         * SHA-384 - Compromise between SHA-256 and SHA-512, medium performance 
+         *                  while being very secure/reliable.
+         * SHA-512 - Slowest, but most secure/reliable. 
+         *                  Found to run faster on 64 bit Hardware/OS than SHA-256. 
+         *                  Recommended for 64 bit Hardware/OS.
+         */
         final Slider sliderHashAlgo = new Slider();
         sliderHashAlgo.setMin(0);
         sliderHashAlgo.setMax(100);
-        sliderHashAlgo.setValue(50);
-        sliderHashAlgo.setShowTickLabels(true);
-        sliderHashAlgo.setShowTickMarks(true);
-        sliderHashAlgo.setMajorTickUnit(50);
-        sliderHashAlgo.setMinorTickCount(5);
+        sliderHashAlgo.setValue(75);
+        //sliderHashAlgo.setShowTickLabels(true);
+        //sliderHashAlgo.setShowTickMarks(true);
+        //sliderHashAlgo.setMajorTickUnit(50);
+        //sliderHashAlgo.setMinorTickCount(5);
         sliderHashAlgo.setBlockIncrement(10);
         
         sliderHashAlgo.valueProperty().addListener(new ChangeListener<Number>() {
@@ -321,7 +351,9 @@ public class ApplicationWindow extends Application {
             
         //}
         
-        delimiterHBox.getChildren().addAll(delimiterTextField, buttonDelimiter, labelHashAlgo, sliderHashAlgo);
+        hashAlgoVBox.getChildren().addAll(hashAlgoBorder, sliderHashAlgo);
+        
+        delimiterHBox.getChildren().addAll(delimiterTextField, buttonDelimiter, hashAlgoVBox);
         
         centerTextVBox.getChildren().addAll(targetTextField, delimiterHBox);
         
@@ -335,14 +367,14 @@ public class ApplicationWindow extends Application {
         
         VBox leftLabelVBox = new VBox();
         leftLabelVBox.setPadding(new Insets(5, 0, 5, 0));
-        leftLabelVBox.setSpacing(10);
+        leftLabelVBox.setSpacing(20);
         leftLabelVBox.setStyle(TOP_STYLE);
         
-        Label labelBrowse = new Label("Target :");
+        Label labelBrowse = new Label(" Target : ");
         labelBrowse.setStyle(LABEL_STYLE);
         labelBrowse.setEffect(shadow);
         
-        Label labelDelimiter = new Label("Delimiter :");
+        Label labelDelimiter = new Label(" Delimiter : ");
         labelDelimiter.setStyle(LABEL_STYLE);
         labelDelimiter.setEffect(shadow);
         
