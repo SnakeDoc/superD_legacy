@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+import com.sun.istack.internal.logging.Logger;
+
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.system.SysInfo;
@@ -292,7 +294,12 @@ public class ApplicationWindow extends Application {
             @Override
             public void handle(ActionEvent event) {
 
-                cfg.setConfig("ROOT_DEL", delimiterTextField.getText(), false);
+                try {
+                    setTargetTextField(getTargetTextField().replace(cfg.getConfig("ROOT_DEL"), getDelimiterTextField()));
+                    cfg.setConfig("ROOT_DEL", delimiterTextField.getText(), false);
+                } catch (ConfigException e) {
+                    // who cares
+                }
                 
             }
             
