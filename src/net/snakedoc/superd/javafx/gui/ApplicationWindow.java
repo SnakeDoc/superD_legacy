@@ -234,7 +234,7 @@ public class ApplicationWindow extends Application {
                 File file = directoryChooser.showDialog(dialog);
                 
                 if (!(targetTextField.getText().equalsIgnoreCase(""))) {
-                    targetTextField.appendText(delimiterTextField + file.getAbsolutePath());
+                    targetTextField.appendText(getDelimiterTextField() + file.getAbsolutePath());
                 } else {
                     targetTextField.setText(file.getAbsolutePath());
                 }
