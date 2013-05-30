@@ -47,6 +47,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -465,6 +466,13 @@ public class ApplicationWindow extends Application {
                 return new CenteredOverrunTableCell();
             }
                 });
+        
+        try {
+            table.setPlaceholder(new ImageView(new Image(new FileInputStream("resources/logo.png"))));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
         table.getColumns().addAll(fileNameCol, sizeCol, directoryCol, fileHashCol);
         
