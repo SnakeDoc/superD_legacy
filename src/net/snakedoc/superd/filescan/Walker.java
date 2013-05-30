@@ -74,6 +74,13 @@ public class Walker {
             } else {
                 break;
             }
+            try {
+                Thread.sleep(25); // short timeout to not block
+            } catch (InterruptedException e) {
+                if (Walker.getTerminate()) {
+                    break;
+                }
+            }
         }
     }
 

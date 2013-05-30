@@ -27,7 +27,6 @@ import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
 import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -81,11 +80,11 @@ public class ApplicationWindow extends Application {
     private static TextField delimiterTextField = null;
     private static Label hashAlgoLabel = null;
     
-    private Config cfg = new Config("props/superD.properties");
+    private final Config cfg = new Config("props/superD.properties");
     
-    private volatile static ObservableList<TableData> data = FXCollections.observableArrayList();
+    private static final ObservableList<TableData> data = FXCollections.observableArrayList();
     @SuppressWarnings("rawtypes")
-    private static TableView table = new TableView();
+    private static final TableView table = new TableView();
     
     /**
      * @param args the command line arguments
@@ -499,12 +498,14 @@ public class ApplicationWindow extends Application {
         
     }
     
-    public synchronized static void addData(TableData td) {
+    //public synchronized static void addData(TableData td) {
+    public static void addData(TableData td) {
         data.add(td);
         table.scrollTo(table.getItems().size());
     }
     
-    public synchronized static void clearData() {
+    //public synchronized static void clearData() {
+    public static void clearData() {
         data.clear();
     }
 
