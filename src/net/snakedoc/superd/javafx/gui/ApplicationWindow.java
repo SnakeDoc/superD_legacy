@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import com.sun.istack.internal.logging.Logger;
-
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.system.SysInfo;
@@ -52,6 +50,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -267,7 +266,7 @@ public class ApplicationWindow extends Application {
         targetTextField = new TextField();
         targetTextField.setEffect(shadow);
         targetTextField.setMinHeight(30);
-        targetTextField.setMinWidth(700);
+        targetTextField.setPrefSize(0,30);
         
         delimiterTextField = new TextField();
         delimiterTextField.setEffect(shadow);
@@ -383,6 +382,8 @@ public class ApplicationWindow extends Application {
         centerTextVBox.getChildren().addAll(targetTextField, delimiterHBox);
         
         centerTextHBox.getChildren().addAll(centerTextVBox);
+        
+        HBox.setHgrow(centerTextVBox, Priority.ALWAYS);
         
         // Create left label
         HBox leftLabelHBox = new HBox();
