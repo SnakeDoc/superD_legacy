@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright 2013 Brian Zitzow                                                *
+ *  Copyright (c) 2013 superD contributors, snakedoc.net and others            *
  *                                                                             *
  *  Licensed under the Apache License, Version 2.0 (the "License");            *
  *  you may not use this file except in compliance with the License.           *
