@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import net.snakedoc.jutils.Config;
 import net.snakedoc.jutils.ConfigException;
 import net.snakedoc.jutils.system.SysInfo;
+import net.snakedoc.superd.filescan.Walker;
 import net.snakedoc.superd.javafx.gui.controller.ThreadDedupe;
 import net.snakedoc.superd.javafx.gui.model.TableData;
 
@@ -54,6 +55,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 /**
@@ -125,6 +127,14 @@ public class ApplicationWindow extends Application {
         if (ico != null) {
             primaryStage.getIcons().add(ico);
         }
+        
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+            @Override
+            public void handle(WindowEvent event) {
+                Walker.setTerminate(true);
+            }
+        });
         
         primaryStage.show();
         
