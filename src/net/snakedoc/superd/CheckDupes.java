@@ -28,6 +28,7 @@ import net.snakedoc.jutils.database.H2;
 
 public class CheckDupes {
     //TODO FIX CHECKDUPES
+    //SHOWS ONE SET OF DUPLICATE FILES (I.E. FILE1 = FILE2) TWICE: File1=File2 and File2=File1
     private static final Logger log = Logger.getLogger(CheckDupes.class);
     
 	public static void main(String[] args) {
