@@ -14,6 +14,7 @@ CREATE TABLE duplicates
  record_id BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
  dupe1_id BIGINT(19),
  dupe2_id BIGINT(19),
+ file_hash VARCHAR(128),
  FOREIGN KEY (dupe1_id) REFERENCES files(record_id),
  FOREIGN KEY (dupe2_id) REFERENCES files(record_id)
 );

@@ -44,8 +44,9 @@ public class CheckDupes {
 		String sqlCompare = "SELECT record_id, file_hash, file_path FROM files " +
 				"WHERE file_hash = ? AND file_path != ?";
 		String sqlGetRecordId = "SELECT record_id FROM files WHERE file_path = ?";
-		String sqlInsertDupes = "INSERT INTO duplicates (dupe1_id, dupe2_id) VALUES(? , ?)";
+		String sqlInsertDupes = "INSERT INTO duplicates (dupe1_id, dupe2_id, file_hash) VALUES(? , ? , ?)";
 		String sqlCountBytes = "SELECT SUM(files.file_size) FROM files JOIN duplicates ON files.record_id = duplicates.dupe1_id;";
+        String sqlAlreadyChecked = "SELECT COUNT(*) FROM duplicates WHERE file_hash = ?";
 		
 		// Prepared Statements (NULL)
 		PreparedStatement psCount = null;
@@ -54,6 +55,7 @@ public class CheckDupes {
 		PreparedStatement psGetRecordId = null;
 		PreparedStatement psInsertDupes = null;
 		PreparedStatement psCountBytes = null;
+        PreparedStatement psAlreadyChecked = null;
 		
 		// Result Sets (NULL)
 		ResultSet rsCount = null;
@@ -61,6 +63,7 @@ public class CheckDupes {
 		ResultSet rsCompare = null;
 		ResultSet rsGetRecordId = null;
 		ResultSet rsCountBytes = null;
+        ResultSet rsAlreadyChecked = null;
 		
 		// Object to hold duplicate data
 		DeDupeObj[] deDupeObj = null;
@@ -69,6 +72,7 @@ public class CheckDupes {
 		int hash_count = 0;
 		int loopCounter = 0;
 		int duplicateCounter = 0;
+        int dupe_count = 0;
 		
 		// setup database object
 		H2 db = null;
@@ -96,6 +100,7 @@ public class CheckDupes {
 			psGetRecordId = db.getConnection().prepareStatement(sqlGetRecordId);
 			psInsertDupes = db.getConnection().prepareStatement(sqlInsertDupes);
 			psCountBytes = db.getConnection().prepareStatement(sqlCountBytes);
+            psAlreadyChecked = db.getConnection().prepareStatement(sqlAlreadyChecked);
 		} catch (SQLException e) {
 			log.error("Error setting database statements!", e);
 		}
@@ -136,32 +141,44 @@ public class CheckDupes {
 		}
 		for (int i = 0; i < deDupeObj.length; i++) {
 			try {
-				psCompare.setString(1, deDupeObj[i].filehash);
-				psCompare.setString(2, deDupeObj[i].filepath);
-				
-				rsCompare = psCompare.executeQuery();
-				    
-				while(rsCompare != null && rsCompare.next()) {
-				    
-				    psGetRecordId.setString(1, deDupeObj[i].filepath);
-				    rsGetRecordId = psGetRecordId.executeQuery();
-				    rsGetRecordId.next();
-				    
-				    // write dupe id numbers to table
-				    psInsertDupes.setLong(1, rsCompare.getLong(1));
-				    psInsertDupes.setLong(2, rsGetRecordId.getLong(1));
-				    psInsertDupes.execute();
-				    
-					log.info("DUPLICATE FOUND!");//TODO add duplicates to File[] and feed into Deleter.buildGUI(File[])
-					duplicateCounter++;
-					log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
-					log.debug(rsCompare.getString(2));
-					log.debug("");
-					log.info(deDupeObj[i].filepath + " | " + rsCompare.getString(3));
-					
-					rsCompare.close();
-					rsCompare = null;
-				}
+                psAlreadyChecked.setString(1, deDupeObj[i].filehash);
+                rsAlreadyChecked = psAlreadyChecked.executeQuery();
+                rsAlreadyChecked.next();
+                dupe_count = rsAlreadyChecked.getInt(1);
+                psAlreadyChecked.clearParameters();
+                rsAlreadyChecked.close();
+                if (dupe_count == 0){
+                    psCompare.setString(1, deDupeObj[i].filehash);
+                    psCompare.setString(2, deDupeObj[i].filepath);
+
+                    rsCompare = psCompare.executeQuery();
+
+                    while(rsCompare != null && rsCompare.next()) {
+
+                        psGetRecordId.setString(1, deDupeObj[i].filepath);
+                        rsGetRecordId = psGetRecordId.executeQuery();
+                        rsGetRecordId.next();
+
+                        // write dupe id numbers to table
+                        psInsertDupes.setLong(1, rsCompare.getLong(1));
+                        psInsertDupes.setLong(2, rsGetRecordId.getLong(1));
+                        psInsertDupes.setString(3, deDupeObj[i].filehash);
+                        psInsertDupes.execute();
+
+                        log.info("DUPLICATE FOUND!");//TODO add duplicates to File[] and feed into Deleter.buildGUI(File[])
+                        duplicateCounter++;
+                        //log.debug(deDupeObj[i].filepath + " | " + deDupeObj[i].filehash);
+                       // log.debug(rsCompare.getString(2));
+                        //log.debug("");
+                        log.info(deDupeObj[i].filepath + " | " + rsCompare.getString(3));
+
+
+				    }
+
+                    rsCompare.close();
+                    rsCompare = null;
+
+                }
 				psCompare.clearParameters();
 			} catch (SQLException e) {
 				log.warn("Failed to query database!", e);
